@@ -31,11 +31,14 @@ public partial struct NearbySearchSystem : ISystem
                           .WithAll<Fighter>()
                           .WithEntityAccess())
         {
-            var buffer = entityManager.GetBuffer<NearbyEntity>(searcherEntity);
-            buffer.Clear();
+            var swarmBuffer = entityManager.GetBuffer<NearbyEntity>(searcherEntity);
+            swarmBuffer.Clear();
+            
+            var avoidanceBuffer = entityManager.GetBuffer<AvoidingEntity>(searcherEntity);
+            avoidanceBuffer.Clear();
 
             float3 center = t.ValueRO.Position;
-            float radiusVal = fighter.ValueRO.searchRadius;
+            float radiusVal = fighter.ValueRO.NeighbourDetectionRadius;
             
             var pInput = new Unity.Physics.PointDistanceInput
             {
@@ -67,11 +70,24 @@ public partial struct NearbySearchSystem : ISystem
                 
                 if (hitEntity == Entity.Null || hitEntity == searcherEntity)
                     continue;
+
+                if (entityManager.HasComponent<AvoidingEntity>(hitEntity))
+                {
+                    avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity });
+                }
                 
-                buffer.Add(new NearbyEntity { entity = hitEntity });
+                if (entityManager.HasComponent<Fighter>(hitEntity))
+                {
+                    swarmBuffer.Add(new NearbyEntity { entity = hitEntity });
+                }
             }
         }
 
         hits.Dispose();
     }
 }
+
+public struct AvoidingTag : IComponentData
+{
+}
+

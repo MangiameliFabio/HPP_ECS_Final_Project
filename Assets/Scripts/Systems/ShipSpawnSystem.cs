@@ -23,7 +23,7 @@ public partial struct ShipSpawnSystem : ISystem
             var fighterEntity = state.EntityManager.Instantiate(config.FighterPrefab);
 
             var randomTransform =
-                TransformUtils.CreateRandomTransform(new float3(-10, -10, -10), new float3(10, 10, 10), UnityEngine.Random.rotation);
+                TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation);
             
             if (state.EntityManager.HasComponent<LocalTransform>(fighterEntity))
             {

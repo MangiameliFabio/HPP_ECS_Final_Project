@@ -42,7 +42,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2596844315948211788}
-  m_Mesh: {fileID: -6252843161074830795, guid: 81b36802f46bd4a4598b3bf778f4b62e, type: 3}
+  m_Mesh: {fileID: 6991831588594472582, guid: 81b36802f46bd4a4598b3bf778f4b62e, type: 3}
 --- !u!23 &1477715682707709708
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -103,6 +103,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09f6f39e6eb4488ea7456280cb0dfe9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FighterAuthoring
+  fighterSpeed: 3
+  fighterRotationSpeed: 5
+  fighterNeighbourDetectionRadius: 10
 --- !u!135 &6116726986323513170
 SphereCollider:
   m_ObjectHideFlags: 0

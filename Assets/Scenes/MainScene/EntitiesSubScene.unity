@@ -165,6 +165,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConfigAuthoring
   fighterPrefab: {fileID: 2596844315948211788, guid: d552407e146d1bc40acc216cb9d2efbb, type: 3}
   fighterCount: 100
+  maxSpawningBounds:
+    x: 30
+    y: 30
+    z: 30
+  minSpawningBounds:
+    x: -30
+    y: -30
+    z: -30
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
