@@ -1,5 +1,4 @@
-﻿// NearbyPhysicsSearchSystem.cs
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -18,76 +17,86 @@ public partial struct NearbySearchSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var physicsSingleton = SystemAPI.GetSingleton<Unity.Physics.PhysicsWorldSingleton>();
+        var physicsSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
         ref var physicsWorld = ref physicsSingleton.PhysicsWorld;
-        
-        NativeList<Unity.Physics.DistanceHit> hits = new NativeList<Unity.Physics.DistanceHit>(Allocator.Temp);
-        
-        var entityManager = state.EntityManager;
-        float dt = SystemAPI.Time.DeltaTime;
 
-        foreach (var (t, fighter, searcherEntity) in
-                 SystemAPI.Query<RefRO<LocalTransform>, RefRO<Fighter>>()
-                          .WithAll<Fighter>()
-                          .WithEntityAccess())
+        var job = new NearbySearchJob()
         {
-            var swarmBuffer = entityManager.GetBuffer<NearbyEntity>(searcherEntity);
+            CurrentPhysicsWorld = physicsWorld
+        };
+        
+        var handle = job.ScheduleParallel(state.Dependency);
+        state.Dependency = handle;
+    }
+
+    [BurstCompile]
+    partial struct NearbySearchJob : IJobEntity
+    {
+        [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
+
+        void Execute(ref LocalTransform localTransform,
+                     ref Fighter fighter,
+                     ref DynamicBuffer<NearbyFighter> swarmBuffer,
+                     ref DynamicBuffer<AvoidingEntity> avoidanceBuffer,
+                     in Entity entity)
+        {
             swarmBuffer.Clear();
-            
-            var avoidanceBuffer = entityManager.GetBuffer<AvoidingEntity>(searcherEntity);
             avoidanceBuffer.Clear();
 
-            float3 center = t.ValueRO.Position;
-            float radiusVal = fighter.ValueRO.NeighbourDetectionRadius;
-            
-            var pInput = new Unity.Physics.PointDistanceInput
+            float3 center = localTransform.Position;
+            float radiusVal = fighter.NeighbourDetectionRadius;
+
+            var pInput = new PointDistanceInput
             {
                 Position = center,
                 MaxDistance = radiusVal,
                 Filter = CollisionFilter.Default
             };
 
-            hits.Clear();
-
-
-            bool gotAny = physicsWorld.CollisionWorld.CalculateDistance(pInput, ref hits);
-
+            var hits = new NativeList<DistanceHit>(Allocator.Temp);
+            bool gotAny = CurrentPhysicsWorld.CollisionWorld.CalculateDistance(pInput, ref hits);
             if (!gotAny)
             {
-                continue;
+                hits.Dispose();
+                return;
             }
-            
+
             for (int i = 0; i < hits.Length; ++i)
             {
                 var hit = hits[i];
-
                 int rbIndex = hit.RigidBodyIndex;
-                if (rbIndex < 0 || rbIndex >= physicsWorld.NumBodies)
-                    continue;
-                
-                var body = physicsWorld.Bodies[rbIndex];
-                Entity hitEntity = body.Entity;
-                
-                if (hitEntity == Entity.Null || hitEntity == searcherEntity)
+                if (rbIndex < 0 || rbIndex >= CurrentPhysicsWorld.NumBodies)
                     continue;
 
-                if (entityManager.HasComponent<AvoidingEntity>(hitEntity))
+                var body = CurrentPhysicsWorld.Bodies[rbIndex];
+                Entity hitEntity = body.Entity;
+
+                if (hitEntity == Entity.Null || hitEntity == entity)
+                    continue;
+
+                // Check if custom tag "Avoid" is set (bit 0)
+                if ((body.CustomTags & 1u) != 0)
                 {
-                    avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity });
+                    // Check if custom tag "Asteroid" is set (bit 3)
+                    // if ((body.CustomTags & 4u) != 0)
+                    // {
+                    //     avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity, hitPosition = hit.Position, importanceFactor = 10f});
+                    // }
+                    // else
+                    // {
+                    //     
+                    // } 
+                    avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity, hitPosition = hit.Position, importanceFactor = 1f });
                 }
-                
-                if (entityManager.HasComponent<Fighter>(hitEntity))
+
+                // Check if custom tag "Fighter" is set (bit 1)
+                if ((body.CustomTags & (1u << 1)) != 0)
                 {
-                    swarmBuffer.Add(new NearbyEntity { entity = hitEntity });
+                    swarmBuffer.Add(new NearbyFighter { entity = hitEntity });
                 }
             }
-        }
 
-        hits.Dispose();
+            hits.Dispose();
+        }
     }
 }
-
-public struct AvoidingTag : IComponentData
-{
-}
-

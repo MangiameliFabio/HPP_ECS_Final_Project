@@ -103,9 +103,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09f6f39e6eb4488ea7456280cb0dfe9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FighterAuthoring
-  fighterSpeed: 3
-  fighterRotationSpeed: 5
-  fighterNeighbourDetectionRadius: 10
+  minFighterSpeed: 10
+  maxFighterSpeed: 20
+  minFighterRotationSpeed: 1
+  maxFighterRotationSpeed: 5
+  fighterNeighbourDetectionRadius: 50
+  alignmentFactor: 1
+  crowdingFactor: 0.8
+  minNeighbourCounterFactor: 0
+  maxNeighbourCounterFactor: 1
+  minAvoidanceFactor: 0
+  maxAvoidanceFactor: 1
 --- !u!135 &6116726986323513170
 SphereCollider:
   m_ObjectHideFlags: 0
