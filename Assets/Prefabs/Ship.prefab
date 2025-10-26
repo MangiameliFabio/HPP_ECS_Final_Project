@@ -105,15 +105,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FighterAuthoring
   minFighterSpeed: 10
   maxFighterSpeed: 20
-  minFighterRotationSpeed: 1
-  maxFighterRotationSpeed: 5
-  fighterNeighbourDetectionRadius: 50
+  minFighterRotationSpeed: 0.5
+  maxFighterRotationSpeed: 3
+  fighterNeighbourDetectionRadius: 2
   alignmentFactor: 1
-  crowdingFactor: 0.8
-  minNeighbourCounterFactor: 0
-  maxNeighbourCounterFactor: 1
-  minAvoidanceFactor: 0
-  maxAvoidanceFactor: 1
+  crowdingFactor: 0.5
+  neighbourCounterFactor: 2
+  avoidanceFactor: 100
+  targetTrendFactor: 1.5
 --- !u!135 &6116726986323513170
 SphereCollider:
   m_ObjectHideFlags: 0

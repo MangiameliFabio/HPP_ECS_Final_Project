@@ -77,16 +77,7 @@ public partial struct NearbySearchSystem : ISystem
                 // Check if custom tag "Avoid" is set (bit 0)
                 if ((body.CustomTags & 1u) != 0)
                 {
-                    // Check if custom tag "Asteroid" is set (bit 3)
-                    // if ((body.CustomTags & 4u) != 0)
-                    // {
-                    //     avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity, hitPosition = hit.Position, importanceFactor = 10f});
-                    // }
-                    // else
-                    // {
-                    //     
-                    // } 
-                    avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity, hitPosition = hit.Position, importanceFactor = 1f });
+                    avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity });
                 }
 
                 // Check if custom tag "Fighter" is set (bit 1)

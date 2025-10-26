@@ -17,10 +17,19 @@ public class AsteroidAuthering : MonoBehaviour
                 //Set physics custom tag to "Avoid" and "Asteroid"
                 Value = (1 << 0) | (1 << 2),
             });
+            AddComponent(entity, new AvoidanceSphere()
+            {
+                Radius = 15f
+            });
         }
     }
 }
 
 public struct Asteroid : IComponentData
 {
+}
+
+public struct AvoidanceSphere : IComponentData
+{
+    public float Radius;
 }

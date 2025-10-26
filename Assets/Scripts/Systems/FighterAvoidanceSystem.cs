@@ -16,12 +16,15 @@ public partial struct FighterAvoidanceSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
+        var avoidanceSphereLookup = SystemAPI.GetComponentLookup<AvoidanceSphere>(true);
 
         localTransformLookup.Update(ref state);
+        avoidanceSphereLookup.Update(ref state);
 
         var job = new FighterAvoidanceJob
         {
-            LocalTransformLookup = localTransformLookup
+            LocalTransformLookup = localTransformLookup,
+            AvoidanceSphereLookup = avoidanceSphereLookup
         };
 
         var handle = job.ScheduleParallel(state.Dependency);
@@ -37,15 +40,16 @@ public partial struct FighterAvoidanceSystem : ISystem
     partial struct FighterAvoidanceJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
+        [ReadOnly] public ComponentLookup<AvoidanceSphere> AvoidanceSphereLookup;
         
         public void Execute(ref Fighter fighter, in LocalTransform localTransform, in DynamicBuffer<AvoidingEntity> avoidanceBuffer, in Entity entity)
         {
             float3 averageAvoidDir = float3.zero;
 
-            if (CheckIfOutOfBounds(localTransform.Position))
-            {
-                fighter.AvoidanceDirection -= localTransform.Position;
-            }
+            // if (CheckIfOutOfBounds(localTransform.Position))
+            // {
+            //     fighter.AvoidanceDirection -= localTransform.Position;
+            // }
             
             int size = avoidanceBuffer.Length;
             if (size == 0)
@@ -57,22 +61,25 @@ public partial struct FighterAvoidanceSystem : ISystem
             {
                 var element = avoidanceBuffer[i];
                 
-                var direction = localTransform.Position - LocalTransformLookup[element.entity].Position;
-                var distance = math.lengthsq(direction);
-
-                var fwDir = localTransform.Forward();
-                direction = math.normalize(direction);
-                var dot = math.dot(fwDir, direction);
-                float angleFactor = math.lerp(0f, 1f, math.clamp(dot, 0f, 1f));
-
-                float radiusSq = fighter.NeighbourDetectionRadius * fighter.NeighbourDetectionRadius;
-                float distanceFactor = math.lerp(fighter.MinAvoidanceFactor, fighter.MaxAvoidanceFactor, math.unlerp(radiusSq, 0f, distance));
-
+                float3 direction = LocalTransformLookup[element.entity].Position - localTransform.Position;
+                float distance = math.lengthsq(direction);
+                
                 if (distance > 0f)
-                    averageAvoidDir += direction * distanceFactor * angleFactor * element.importanceFactor;
+                {
+                    direction = math.normalize(direction);
+
+                    if (!AvoidanceSphereLookup.HasComponent(element.entity))
+                        continue;
+
+                    float obstacleSphereRadius = AvoidanceSphereLookup[element.entity].Radius;
+                    float maxRange = math.pow(fighter.NeighbourDetectionRadius + obstacleSphereRadius, 2f);
+                    float distanceFactor = math.clamp(1 - distance / maxRange, 0, 1);
+                    
+                    averageAvoidDir += direction * distanceFactor;
+                }
             }
 
-            fighter.AvoidanceDirection = averageAvoidDir;
+            fighter.AvoidanceDirection -= averageAvoidDir;
         }
 
         private bool CheckIfOutOfBounds(float3 point)
@@ -89,6 +96,4 @@ public partial struct FighterAvoidanceSystem : ISystem
 public struct AvoidingEntity : IBufferElementData
 {
     public Entity entity;
-    public float3 hitPosition;
-    public float importanceFactor;
 }

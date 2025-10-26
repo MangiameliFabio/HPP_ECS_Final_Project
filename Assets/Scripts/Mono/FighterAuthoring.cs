@@ -2,6 +2,7 @@
 using Unity.Mathematics;
 using Unity.Physics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class FighterAuthoring : MonoBehaviour
 {
@@ -12,10 +13,9 @@ public class FighterAuthoring : MonoBehaviour
     public float fighterNeighbourDetectionRadius = 10f;
     public float alignmentFactor = 1f;
     public float crowdingFactor = 0.5f;
-    public float minNeighbourCounterFactor = 0f;
-    public float maxNeighbourCounterFactor = 5f;
-    public float minAvoidanceFactor = 1f;
-    public float maxAvoidanceFactor = 10f;
+    public float neighbourCounterFactor = 1f;
+    public float avoidanceFactor = 100f;
+    public float targetTrendFactor = 1f;
     
     class Baker : Baker<FighterAuthoring>
     {
@@ -32,10 +32,9 @@ public class FighterAuthoring : MonoBehaviour
                 NeighbourDetectionRadius = authoring.fighterNeighbourDetectionRadius,
                 AlignmentFactor = authoring.alignmentFactor,
                 CrowdingFactor = authoring.crowdingFactor,
-                MinNeighbourCounterFactor = authoring.minNeighbourCounterFactor,
-                MaxNeighbourCounterFactor = authoring.maxNeighbourCounterFactor,
-                MinAvoidanceFactor = authoring.minAvoidanceFactor,
-                MaxAvoidanceFactor = authoring.maxAvoidanceFactor,
+                NeighbourCounterForceFactor = authoring.neighbourCounterFactor,
+                AvoidanceFactor = authoring.avoidanceFactor,
+                TargetTrendFactor = authoring.targetTrendFactor,
             });
             AddComponent(entity, new PhysicsCustomTags()
             {
@@ -58,14 +57,15 @@ public struct Fighter : IComponentData
     public float NeighbourDetectionRadius;
     public float AlignmentFactor;
     public float CrowdingFactor;
-    public float MinNeighbourCounterFactor;
-    public float MaxNeighbourCounterFactor;
-    public float MinAvoidanceFactor;
-    public float MaxAvoidanceFactor;
+    public float NeighbourCounterForceFactor;
+    public float TargetTrendFactor;
+    public float AvoidanceFactor;
     
     public float3 AlignmentDirection;
     public float3 CrowdCenter;
     public float3 AvoidanceDirection;
+    public float3 NeighbourCounterForceDirection;
+    public float3 TargetDirection;
 }
 
 public struct NearbyFighter : IBufferElementData

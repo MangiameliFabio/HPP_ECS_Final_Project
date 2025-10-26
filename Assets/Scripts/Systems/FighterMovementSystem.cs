@@ -35,28 +35,28 @@ public partial struct MoveForwardJob : IJobEntity
 {
     public float deltaTime;
 
-    void Execute(ref LocalTransform transform, in Fighter fighter)
+    void Execute(ref LocalTransform transform, ref Fighter fighter)
     {
         float3 alignmentDirection = math.normalizesafe(fighter.AlignmentDirection, float3.zero);
+        float3 avoidanceDirection = math.normalizesafe(fighter.AvoidanceDirection, float3.zero);
+        float3 neighbourForceDirection = math.normalizesafe(fighter.NeighbourCounterForceDirection, float3.zero);
         
-        if (math.lengthsq(alignmentDirection) < 1e-5f)
-            alignmentDirection = transform.Forward();
-        
-        float3 toCenterDir = transform.Forward();
+        float3 toCenterDir = float3.zero;
         if (!fighter.CrowdCenter.Equals(float3.zero))
-        {
-            toCenterDir = math.normalizesafe(fighter.CrowdCenter - transform.Position, float3.zero);
-        }
+            toCenterDir = math.normalizesafe(fighter.CrowdCenter - transform.Position);
         
-        float3 avoidanceDirection = float3.zero;
-        if (!fighter.AvoidanceDirection.Equals(float3.zero))
-        {
-            avoidanceDirection = math.normalizesafe(fighter.AvoidanceDirection, float3.zero);
-        }
+        fighter.TargetDirection =  math.normalizesafe(new float3(100f,100f,100f) - transform.Position);
 
-        float3 newDirection = alignmentDirection * fighter.AlignmentFactor + toCenterDir * fighter.CrowdingFactor + avoidanceDirection;
+        float3 newDirection =
+            alignmentDirection * fighter.AlignmentFactor +
+            avoidanceDirection * fighter.AvoidanceFactor +
+            neighbourForceDirection * fighter.NeighbourCounterForceFactor +
+            fighter.TargetDirection * fighter.TargetTrendFactor +
+            toCenterDir * fighter.CrowdingFactor;
         
-        quaternion targetRot = quaternion.LookRotationSafe(newDirection, math.up());
+        quaternion targetRot = transform.Rotation;
+        if (!newDirection.Equals(float3.zero))
+            targetRot = quaternion.LookRotationSafe(newDirection, math.up());
         
         float angle = math.acos(math.clamp(math.dot(transform.Rotation.value, targetRot.value), -1f, 1f)) * 2f;
         
@@ -68,5 +68,10 @@ public partial struct MoveForwardJob : IJobEntity
 
         float dynamicSpeed = math.lerp(fighter.MinSpeed, fighter.MaxSpeed, normalizedAngle);
         transform.Position += transform.Forward() * dynamicSpeed * deltaTime;
+        
+        fighter.AlignmentDirection = float3.zero;
+        fighter.AvoidanceDirection = float3.zero;
+        fighter.TargetDirection = float3.zero;
+        fighter.CrowdCenter = float3.zero;
     }
 }

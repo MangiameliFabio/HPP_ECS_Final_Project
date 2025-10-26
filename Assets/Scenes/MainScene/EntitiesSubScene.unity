@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConfigAuthoring
   fighterPrefab: {fileID: 2596844315948211788, guid: d552407e146d1bc40acc216cb9d2efbb, type: 3}
-  fighterCount: 200
+  fighterCount: 500
   maxSpawningBounds:
     x: 50
     y: 50
@@ -268,7 +268,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1
+  m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &1694255681
 Transform:
@@ -279,7 +279,7 @@ Transform:
   m_GameObject: {fileID: 1694255677}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 42.4, y: 0, z: 0}
+  m_LocalPosition: {x: 100.9, y: 100, z: 104.9}
   m_LocalScale: {x: 30, y: 30, z: 30}
   m_ConstrainProportionsScale: 0
   m_Children: []

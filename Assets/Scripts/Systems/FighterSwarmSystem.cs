@@ -41,8 +41,10 @@ public partial struct FighterSwarmSystem : ISystem
         {
             float size = buffer.Length;
             
+            if (size == 0) return;
+            
             float3 averageDir = localTransform.Forward();
-            float3 averagePosition = localTransform.Position;
+            float3 averagePosition = float3.zero;
             float3 averageCounterForceDir = float3.zero;
                 
             var entityLocalTransform = LocalTransformLookup[entity];
@@ -59,14 +61,15 @@ public partial struct FighterSwarmSystem : ISystem
                 var distance = math.lengthsq(direction);
                 
                 float radiusSq = fighter.NeighbourDetectionRadius * fighter.NeighbourDetectionRadius;
-                float distanceFactor = math.lerp(fighter.MinNeighbourCounterFactor, fighter.MaxNeighbourCounterFactor, math.unlerp(radiusSq, 0f, distance));
+                float distanceFactor = math.lerp(0, 1, math.clamp(math.unlerp(radiusSq, 0f, distance), 0, 1));
                 
                 if (distance > 0f)
                     averageCounterForceDir += math.normalize(direction) * distanceFactor;
             }
 
-            fighter.CrowdCenter = averagePosition / size;
-            fighter.AlignmentDirection = averageDir + averageCounterForceDir;
+            fighter.CrowdCenter = averagePosition / math.max(size, 1f);
+            fighter.AlignmentDirection = averageDir;
+            fighter.NeighbourCounterForceDirection = averageCounterForceDir;
         }
     }
 }
