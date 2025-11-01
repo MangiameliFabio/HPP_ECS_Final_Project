@@ -15,7 +15,7 @@ public class AsteroidAuthering : MonoBehaviour
             AddComponent(entity, new PhysicsCustomTags()
             {
                 //Set physics custom tag to "Avoid" and "Asteroid"
-                Value = (1 << 0) | (1 << 2),
+                Value = (int)(PhysicsTags.Avoid | PhysicsTags.Asteroid)
             });
             AddComponent(entity, new AvoidanceSphere()
             {

@@ -31,3 +31,12 @@ public struct Config : IComponentData
     public float3 MaxSpawningBounds;
     public float3 MinSpawningBounds;
 }
+
+[System.Flags]
+public enum PhysicsTags
+{
+    Avoid = 1 << 0,
+    Fighter = 1 << 1,
+    Asteroid = 1 << 2,
+    Target = 1 << 3,
+}

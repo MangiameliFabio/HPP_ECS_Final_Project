@@ -39,7 +39,7 @@ public class FighterAuthoring : MonoBehaviour
             AddComponent(entity, new PhysicsCustomTags()
             {
                 //Set physics custom tag to "Fighter"
-                Value = (1 << 1),
+                Value = (int)PhysicsTags.Fighter
             });
             
             AddBuffer<NearbyFighter>(entity);

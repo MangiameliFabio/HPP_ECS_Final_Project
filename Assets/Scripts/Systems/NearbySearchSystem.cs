@@ -35,10 +35,10 @@ public partial struct NearbySearchSystem : ISystem
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
 
         void Execute(ref LocalTransform localTransform,
-                     ref Fighter fighter,
-                     ref DynamicBuffer<NearbyFighter> swarmBuffer,
-                     ref DynamicBuffer<AvoidingEntity> avoidanceBuffer,
-                     in Entity entity)
+                            ref Fighter fighter,
+                            ref DynamicBuffer<NearbyFighter> swarmBuffer,
+                            ref DynamicBuffer<AvoidingEntity> avoidanceBuffer,
+                            in Entity entity)
         {
             swarmBuffer.Clear();
             avoidanceBuffer.Clear();
@@ -74,14 +74,15 @@ public partial struct NearbySearchSystem : ISystem
                 if (hitEntity == Entity.Null || hitEntity == entity)
                     continue;
 
-                // Check if custom tag "Avoid" is set (bit 0)
-                if ((body.CustomTags & 1u) != 0)
+                // TODO: I am not sure why we are casting to uint here, when the initial tag is an int
+                // Check if custom tag "Avoid" is set
+                if ((body.CustomTags & (uint)PhysicsTags.Avoid) != 0)
                 {
                     avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity });
                 }
 
-                // Check if custom tag "Fighter" is set (bit 1)
-                if ((body.CustomTags & (1u << 1)) != 0)
+                // Check if custom tag "Fighter" is set
+                if ((body.CustomTags & (uint)PhysicsTags.Fighter) != 0)
                 {
                     swarmBuffer.Add(new NearbyFighter { entity = hitEntity });
                 }
