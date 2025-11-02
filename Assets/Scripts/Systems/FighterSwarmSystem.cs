@@ -81,6 +81,7 @@ public partial struct FighterSwarmSystem : ISystem
 
             fighter.CrowdCenter = averagePosition / math.max(size, 1f);
 
+            // rn we are adding #fighters crowd centers, can for sure be optimized
             queueWriter.Enqueue(fighter.CrowdCenter);
 
             fighter.AlignmentDirection = averageDir;

@@ -45,9 +45,28 @@ public partial struct CanonFireSystem : ISystem
                 var direction = new float3(0,0,0);
 
                 if (swarmCenters.Length == 0)
+                {
                     return;
+                }
                 else
-                    direction = swarmCenters[0].Position - localToWorld.ValueRO.Position;
+                {
+                    // iterate through all swarm centers and chose the one closest to the canon
+                    float minDistance = float.MaxValue;
+                    float3 closestSwarmCenter = float3.zero;
+
+                    foreach (var swarmCenter in swarmCenters)
+                    {
+                        float distance = math.distance(localToWorld.ValueRO.Position, swarmCenter.Position);
+                        if (distance < minDistance)
+                        {
+                            minDistance = distance;
+                            closestSwarmCenter = swarmCenter.Position;
+                        }
+                    }
+
+                    direction = closestSwarmCenter - localToWorld.ValueRO.Position;
+                }
+
 
                 direction = math.normalize(direction);
 

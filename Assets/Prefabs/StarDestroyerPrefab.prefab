@@ -223,7 +223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0c6d48134d4244a9210067b5ff4459, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CanonAuthoring
-  CoolDownTime: 5
+  CoolDownTime: 1
   CurrentCoolDown: 0
 --- !u!1 &643502659340079854
 GameObject:
