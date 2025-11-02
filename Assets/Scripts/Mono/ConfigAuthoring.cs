@@ -5,6 +5,7 @@ using UnityEngine;
 public class ConfigAuthoring : MonoBehaviour
 {
     public GameObject fighterPrefab;
+    public GameObject starDestroyerLaser;
     public int fighterCount;
     public float3 maxSpawningBounds;
     public float3 minSpawningBounds;
@@ -17,6 +18,7 @@ public class ConfigAuthoring : MonoBehaviour
             AddComponent(entity, new Config
             {
                 FighterPrefab = GetEntity(authoring.fighterPrefab, TransformUsageFlags.Dynamic),
+                StarDestroyerLaser = GetEntity(authoring.starDestroyerLaser, TransformUsageFlags.Dynamic),
                 FighterCount = authoring.fighterCount,
                 MaxSpawningBounds =  authoring.maxSpawningBounds,
                 MinSpawningBounds = authoring.minSpawningBounds,
@@ -27,6 +29,7 @@ public class ConfigAuthoring : MonoBehaviour
 public struct Config : IComponentData
 {
     public Entity FighterPrefab;
+    public Entity StarDestroyerLaser;
     public int FighterCount;
     public float3 MaxSpawningBounds;
     public float3 MinSpawningBounds;

@@ -15,16 +15,27 @@ public partial struct FighterSwarmSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
-
         localTransformLookup.Update(ref state);
+        
+        // collect swarm centers so we can assign them to the canon buffers in the next job
+        NativeQueue<float3> swarmCenters = new NativeQueue<float3>(Allocator.TempJob);
 
-        var job = new FighterSwarmJob()
+        var swarmJob = new FighterSwarmJob()
         {
-            LocalTransformLookup = localTransformLookup
+            LocalTransformLookup = localTransformLookup,
+            queueWriter = swarmCenters.AsParallelWriter()
         };
+        var swarmHandle = swarmJob.ScheduleParallel(state.Dependency);
 
-        var handle = job.ScheduleParallel(state.Dependency);
-        state.Dependency = handle;
+        swarmHandle.Complete();
+        var updateCanonBufferJob = new UpdateCanonSwarmCentersJob()
+        {
+            SwarmCenters = swarmCenters.ToArray(Allocator.TempJob)
+        };
+        var canonUpdateHandle = updateCanonBufferJob.ScheduleParallel(swarmHandle);
+
+        swarmCenters.Dispose(canonUpdateHandle);
+        state.Dependency = canonUpdateHandle;
     }
 
     [BurstCompile]
@@ -37,6 +48,7 @@ public partial struct FighterSwarmSystem : ISystem
     partial struct FighterSwarmJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
+        public NativeQueue<float3>.ParallelWriter queueWriter;
         void Execute(in DynamicBuffer<NearbyFighter> buffer, in LocalTransform localTransform, ref Fighter fighter, in Entity entity)
         {
             float size = buffer.Length;
@@ -68,8 +80,26 @@ public partial struct FighterSwarmSystem : ISystem
             }
 
             fighter.CrowdCenter = averagePosition / math.max(size, 1f);
+
+            queueWriter.Enqueue(fighter.CrowdCenter);
+
             fighter.AlignmentDirection = averageDir;
             fighter.NeighbourCounterForceDirection = averageCounterForceDir;
+        }
+    }
+
+    [BurstCompile]
+    partial struct UpdateCanonSwarmCentersJob : IJobEntity
+    {
+        [ReadOnly] public NativeArray<float3> SwarmCenters;
+        void Execute(ref DynamicBuffer<SwarmCenterBuffer> buffer, ref Canon canon)
+        {
+            buffer.Clear();
+
+            for (int i = 0; i < SwarmCenters.Length; i++)
+            {
+                buffer.Add(new SwarmCenterBuffer { Position = SwarmCenters[i] });
+            }
         }
     }
 }

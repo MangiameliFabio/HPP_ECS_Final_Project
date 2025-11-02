@@ -3,7 +3,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using UnityEngine;
 
-public class StarDestroyerAuthering : MonoBehaviour
+public class StarDestroyerAuthoring : MonoBehaviour
 {
     public float speed = 0.001f;
     public float movementProgress = 0;
@@ -13,9 +13,9 @@ public class StarDestroyerAuthering : MonoBehaviour
     public float movementRadius = 300;
     public float ID;
 
-    class Baker : Baker<StarDestroyerAuthering>
+    class Baker : Baker<StarDestroyerAuthoring>
     {
-        public override void Bake(StarDestroyerAuthering authoring)
+        public override void Bake(StarDestroyerAuthoring authoring)
         {
             // GetEntity returns the Entity baked from the GameObject
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);

@@ -4,9 +4,6 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.GraphicsBuffer;
 
 public partial struct StarDestroyerMovementSystem : ISystem
 {
