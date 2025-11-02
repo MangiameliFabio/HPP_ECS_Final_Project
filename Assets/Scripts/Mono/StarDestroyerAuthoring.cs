@@ -31,12 +31,15 @@ public class StarDestroyerAuthering : MonoBehaviour
             AddComponent(entity, new PhysicsCustomTags()
             {
                 //Set physics custom tag to "Avoid" and "Target"
-                Value = (int)(PhysicsTags.Avoid | PhysicsTags.Asteroid)
+                Value = (int)(PhysicsTags.Avoid)
             });
+            var sphere = GetComponent<UnityEngine.SphereCollider>();
+            var localTransform = GetComponent<Transform>();
             AddComponent(entity, new AvoidanceSphere()
             {
-                Radius = 35f
+                Radius = sphere.radius * localTransform.localScale.x,
             });
+            AddComponent(entity, new TargetEntity());
         }
     }
 }

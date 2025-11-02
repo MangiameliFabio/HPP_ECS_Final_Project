@@ -17,9 +17,11 @@ public class AsteroidAuthering : MonoBehaviour
                 //Set physics custom tag to "Avoid" and "Asteroid"
                 Value = (int)(PhysicsTags.Avoid | PhysicsTags.Asteroid)
             });
+            var sphere = GetComponent<UnityEngine.SphereCollider>();
+            var localTransform = GetComponent<Transform>();
             AddComponent(entity, new AvoidanceSphere()
             {
-                Radius = 15f
+                Radius = sphere.radius * localTransform.localScale.x,
             });
         }
     }

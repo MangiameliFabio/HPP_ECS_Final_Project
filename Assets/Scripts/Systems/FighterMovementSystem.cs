@@ -45,7 +45,7 @@ public partial struct MoveForwardJob : IJobEntity
         if (!fighter.CrowdCenter.Equals(float3.zero))
             toCenterDir = math.normalizesafe(fighter.CrowdCenter - transform.Position);
         
-        fighter.TargetDirection =  math.normalizesafe(new float3(100f,100f,100f) - transform.Position);
+        fighter.TargetDirection =  math.normalizesafe(fighter.CurrentTargetPosition - transform.Position, float3.zero);
 
         float3 newDirection =
             alignmentDirection * fighter.AlignmentFactor +
@@ -66,7 +66,7 @@ public partial struct MoveForwardJob : IJobEntity
         quaternion newRot = math.slerp(transform.Rotation, targetRot, dynamicRotationSpeed * deltaTime);
         transform.Rotation = math.normalize(newRot);
 
-        float dynamicSpeed = math.lerp(fighter.MinSpeed, fighter.MaxSpeed, normalizedAngle);
+        float dynamicSpeed = math.lerp(fighter.MinSpeed, fighter.MaxSpeed, math.clamp(200 / math.length(newDirection), 0 , 1));
         transform.Position += transform.Forward() * dynamicSpeed * deltaTime;
         
         fighter.AlignmentDirection = float3.zero;
