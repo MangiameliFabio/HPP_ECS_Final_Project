@@ -2,13 +2,27 @@
 using Unity.Mathematics;
 using UnityEngine;
 
+[System.Serializable]
+public struct SpawningBounds
+{
+    public float3 MaxBounds;
+    public float3 MinBounds;
+}
+
 public class ConfigAuthoring : MonoBehaviour
 {
+    [Header("Prefabs")]
     public GameObject fighterPrefab;
-    public GameObject starDestroyerLaser;
+    public GameObject starDestroyerLaserPrefab;
+
+    [Header("VFX Prefabs")]
+    public GameObject cruiserBlastPrefab;
+
+    [Header("Settings")]
     public int fighterCount;
-    public float3 maxSpawningBounds;
-    public float3 minSpawningBounds;
+
+    [Header("Spawning Bounds")]
+    public SpawningBounds spawningBounds;
 
     class Baker : Baker<ConfigAuthoring>
     {
@@ -18,18 +32,21 @@ public class ConfigAuthoring : MonoBehaviour
             AddComponent(entity, new Config
             {
                 FighterPrefab = GetEntity(authoring.fighterPrefab, TransformUsageFlags.Dynamic),
-                StarDestroyerLaser = GetEntity(authoring.starDestroyerLaser, TransformUsageFlags.Dynamic),
+                CruiserLaserPrefab = GetEntity(authoring.starDestroyerLaserPrefab, TransformUsageFlags.Dynamic),
+                CruiserLaserBlastVFX = GetEntity(authoring.cruiserBlastPrefab, TransformUsageFlags.Dynamic),
                 FighterCount = authoring.fighterCount,
-                MaxSpawningBounds =  authoring.maxSpawningBounds,
-                MinSpawningBounds = authoring.minSpawningBounds,
+                MaxSpawningBounds = authoring.spawningBounds.MaxBounds,
+                MinSpawningBounds = authoring.spawningBounds.MinBounds,
             });
         }
     }
 }
+
 public struct Config : IComponentData
 {
     public Entity FighterPrefab;
-    public Entity StarDestroyerLaser;
+    public Entity CruiserLaserPrefab;
+    public Entity CruiserLaserBlastVFX;
     public int FighterCount;
     public float3 MaxSpawningBounds;
     public float3 MinSpawningBounds;

@@ -45,13 +45,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConfigAuthoring
   fighterPrefab: {fileID: 2596844315948211788, guid: d552407e146d1bc40acc216cb9d2efbb, type: 3}
-  starDestroyerLaser: {fileID: 5188235913935746775, guid: 87f59d88af28f5d46b1581a4cb1c6d3b, type: 3}
+  starDestroyerLaserPrefab: {fileID: 5188235913935746775, guid: 87f59d88af28f5d46b1581a4cb1c6d3b, type: 3}
+  cruiserBlastPrefab: {fileID: 7789740071003985497, guid: 2e32a47f6ab1eb74396e6c3909d8819e, type: 3}
   fighterCount: 1000
-  maxSpawningBounds:
-    x: 100
-    y: 100
-    z: 100
-  minSpawningBounds:
-    x: -100
-    y: -100
-    z: -100
+  spawningBounds:
+    MaxBounds:
+      x: 0
+      y: 0
+      z: 0
+    MinBounds:
+      x: 0
+      y: 0
+      z: 0

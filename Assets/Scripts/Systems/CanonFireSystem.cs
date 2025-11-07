@@ -35,7 +35,8 @@ public partial struct CanonFireSystem : ISystem
         var config = SystemAPI.GetSingleton<Config>();
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        var laserTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerLaser);
+        var laserTransform = state.EntityManager.GetComponentData<LocalTransform>(config.CruiserLaserPrefab);
+        var vfxTransform = state.EntityManager.GetComponentData<LocalTransform>(config.CruiserLaserBlastVFX);
 
         foreach (var (canon, localToWorld, localTransform, swarmCenters)
                  in SystemAPI.Query<RefRW<Canon>, RefRO<LocalToWorld>, RefRO<LocalTransform>, DynamicBuffer<SwarmCenterBuffer>>())
@@ -45,7 +46,15 @@ public partial struct CanonFireSystem : ISystem
                 // for now just shoot at the first swarm center or forward when there is none just to debug
                 var direction = math.normalize(localTransform.ValueRO.Forward());
 
-                var laserEntity = ecb.Instantiate(config.StarDestroyerLaser);
+                var laserEntity = ecb.Instantiate(config.CruiserLaserPrefab);
+                var vfxEntity = ecb.Instantiate(config.CruiserLaserBlastVFX);
+                ecb.SetComponent(vfxEntity, new LocalTransform
+                {
+                    Position = localToWorld.ValueRO.Position,
+                    Rotation = localToWorld.ValueRO.Rotation,
+                    Scale = vfxTransform.Scale
+                });
+                ecb.SetComponent(vfxEntity, new LaserVFX { });
 
                 ecb.SetComponent(laserEntity, new LocalTransform
                 {
@@ -57,7 +66,7 @@ public partial struct CanonFireSystem : ISystem
                 ecb.SetComponent(laserEntity, new LaserSD
                 {
                     Direction = direction,
-                    Speed = 50f
+                    Speed = 100f
                 });
 
                 canon.ValueRW.CurrentCoolDown = 0f;
