@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ConfigAuthoring
   fighterPrefab: {fileID: 2596844315948211788, guid: d552407e146d1bc40acc216cb9d2efbb, type: 3}
   starDestroyerLaser: {fileID: 5188235913935746775, guid: 87f59d88af28f5d46b1581a4cb1c6d3b, type: 3}
-  fighterCount: 500
+  fighterCount: 1000
   maxSpawningBounds:
     x: 100
     y: 100

@@ -15,9 +15,10 @@ public class CanonAuthoring : MonoBehaviour
             // GetEntity returns the Entity baked from the GameObject
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
             AddComponent(entity, new Canon
-            {
+            { 
                 CoolDownTime = authoring.CoolDownTime,
-                CurrentCoolDown = authoring.CurrentCoolDown
+                CurrentCoolDown = authoring.CurrentCoolDown,
+                RotationSpeed = 0.25f
             });
             AddBuffer<SwarmCenterBuffer>(entity);
 
@@ -29,6 +30,8 @@ public struct Canon : IComponentData
 {
     public float CoolDownTime;
     public float CurrentCoolDown;
+    public float RotationSpeed;
+    public bool IsAimingAtTarget;
 }
 public struct SwarmCenterBuffer : IBufferElementData
 {
