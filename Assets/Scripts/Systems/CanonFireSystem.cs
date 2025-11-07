@@ -44,7 +44,7 @@ public partial struct CanonFireSystem : ISystem
             if (canon.ValueRO.CurrentCoolDown >= canon.ValueRO.CoolDownTime && canon.ValueRO.IsAimingAtTarget)
             {
                 // for now just shoot at the first swarm center or forward when there is none just to debug
-                var direction = math.normalize(localTransform.ValueRO.Forward());
+                var direction = math.normalize(localToWorld.ValueRO.Forward);
 
                 var laserEntity = ecb.Instantiate(config.CruiserLaserPrefab);
                 var vfxEntity = ecb.Instantiate(config.CruiserLaserBlastVFX);
@@ -137,6 +137,5 @@ public partial struct OrientateTurrentsJob : IJobEntity
         {
             canon.IsAimingAtTarget = false;
         }
-
     }
 }
