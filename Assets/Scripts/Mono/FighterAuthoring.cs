@@ -17,6 +17,7 @@ public class FighterAuthoring : MonoBehaviour
     public float avoidanceFactor = 100f;
     public float targetTrendFactor = 1f;
     public float targetMinDistance = 50f;
+    public double fireCooldown = 5;
     
     class Baker : Baker<FighterAuthoring>
     {
@@ -37,7 +38,8 @@ public class FighterAuthoring : MonoBehaviour
                 AvoidanceFactor = authoring.avoidanceFactor,
                 TargetTrendFactor = authoring.targetTrendFactor,
                 TargetMinDistance = authoring.targetMinDistance,
-                CurrentTargetPosition = float3.zero
+                CurrentTargetPosition = float3.zero,
+                FireCooldown = authoring.fireCooldown
             });
             AddComponent(entity, new PhysicsCustomTags()
             {
@@ -77,8 +79,10 @@ public struct Fighter : IComponentData
     public float3 NeighbourCounterForceDirection;
     public float3 TargetDirection;
     public float3 CurrentTargetPosition;
-    public FighterState currentState;
-    public Entity targetEntity;
+    public FighterState CurrentState;
+    public Entity TargetEntity;
+    public double FireCooldown;
+    public double LastShotTime;
 }
 
 public struct NearbyFighter : IBufferElementData

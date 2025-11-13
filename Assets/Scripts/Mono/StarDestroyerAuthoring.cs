@@ -12,6 +12,7 @@ public class StarDestroyerAuthoring : MonoBehaviour
     public float3 point3 = new float3(0, 0, 10);
     public float movementRadius = 300;
     public float ID;
+    public float health = 100;
 
     class Baker : Baker<StarDestroyerAuthoring>
     {
@@ -40,6 +41,10 @@ public class StarDestroyerAuthoring : MonoBehaviour
                 Radius = sphere.radius * localTransform.localScale.x,
             });
             AddComponent(entity, new TargetEntity());
+            AddComponent(entity, new HealthComponent()
+            {
+                Health = authoring.health,
+            });
         }
     }
 }

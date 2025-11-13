@@ -56,20 +56,20 @@ public partial struct FighterFindTargetSystem : ISystem
             var fighter = fighterRef.ValueRW;
             float3 myPos = localTransformRO.ValueRO.Position;
 
-            if (fighter.targetEntity != Entity.Null)
+            if (fighter.TargetEntity != Entity.Null)
             {
-                if (LocalTransformLookup.HasComponent(fighter.targetEntity))
+                if (LocalTransformLookup.HasComponent(fighter.TargetEntity))
                 {
-                    if (fighter.currentState == FighterState.Attack)
-                        fighter.CurrentTargetPosition = LocalTransformLookup[fighter.targetEntity].Position;
+                    if (fighter.CurrentState == FighterState.Attack)
+                        fighter.CurrentTargetPosition = LocalTransformLookup[fighter.TargetEntity].Position;
                 }
                 else
                 {
-                    fighter.targetEntity = Entity.Null;
+                    fighter.TargetEntity = Entity.Null;
                 }
             }
 
-            if (fighter.targetEntity == Entity.Null)
+            if (fighter.TargetEntity == Entity.Null)
             {
                 Entity best = Entity.Null;
                 float bestDistSq = float.MaxValue;
@@ -94,9 +94,9 @@ public partial struct FighterFindTargetSystem : ISystem
 
                 if (best != Entity.Null)
                 {
-                    fighter.targetEntity = best;
+                    fighter.TargetEntity = best;
                     fighter.CurrentTargetPosition = bestPos;
-                    fighter.currentState = FighterState.Attack;
+                    fighter.CurrentState = FighterState.Attack;
                 }
             }
 
@@ -105,12 +105,12 @@ public partial struct FighterFindTargetSystem : ISystem
 
             if (distSqToCurrentTarget < minDistSq)
             {
-                if (fighter.currentState == FighterState.Retreat)
-                    fighter.targetEntity = Entity.Null;
-                else if (fighter.currentState == FighterState.Attack)
+                if (fighter.CurrentState == FighterState.Retreat)
+                    fighter.TargetEntity = Entity.Null;
+                else if (fighter.CurrentState == FighterState.Attack)
                 {
                     fighter.CurrentTargetPosition = myPos + localTransformRO.ValueRO.Forward() * 200f;
-                    fighter.currentState = FighterState.Retreat;
+                    fighter.CurrentState = FighterState.Retreat;
                 }
             }
 

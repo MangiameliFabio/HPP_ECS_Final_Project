@@ -60,3 +60,8 @@ public enum PhysicsTags
     Asteroid = 1 << 2,
     Target = 1 << 3,
 }
+
+public struct HealthComponent : IComponentData
+{
+    public float Health;
+}

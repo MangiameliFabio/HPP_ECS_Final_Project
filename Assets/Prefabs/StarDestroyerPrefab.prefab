@@ -1331,6 +1331,7 @@ MonoBehaviour:
     z: 10
   movementRadius: 300
   ID: 0
+  health: 100
 --- !u!135 &7335650685747766299
 SphereCollider:
   m_ObjectHideFlags: 0
