@@ -575,6 +575,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
+      propertyPath: fighterCount
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4828437596899881734, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

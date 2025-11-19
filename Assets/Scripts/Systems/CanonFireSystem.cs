@@ -5,6 +5,8 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 using Unity.Collections;
+using Unity.IO.LowLevel.Unsafe;
+using Unity.Jobs;
 
 public partial struct CanonFireSystem : ISystem
 {
@@ -19,28 +21,36 @@ public partial struct CanonFireSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        //first rotate the canon towards the swarm center in a job
+        var fighterQuery = SystemAPI.QueryBuilder()
+            .WithAll<Fighter, LocalTransform>()
+            .Build();
+
+        var fighterTransforms = fighterQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
 
         var job = new OrientateTurrentsJob
         {
             deltaTime = SystemAPI.Time.DeltaTime,
+            FighterTransforms = fighterTransforms
         };
 
-        var handle = job.ScheduleParallel(state.Dependency);
-        state.Dependency = handle;
-        handle.Complete();
+        var orientJobHandle = job.ScheduleParallel(state.Dependency);
+
+        state.Dependency = orientJobHandle;
+        state.Dependency = fighterTransforms.Dispose(state.Dependency);
+        orientJobHandle.Complete();
 
         // then shoot (initiate laser entities) on main thread
-
         var config = SystemAPI.GetSingleton<Config>();
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
         var laserTransform = state.EntityManager.GetComponentData<LocalTransform>(config.CruiserLaserPrefab);
         var vfxTransform = state.EntityManager.GetComponentData<LocalTransform>(config.CruiserLaserBlastVFX);
 
-        foreach (var (canon, localToWorld, localTransform, swarmCenters)
-                 in SystemAPI.Query<RefRW<Canon>, RefRO<LocalToWorld>, RefRO<LocalTransform>, DynamicBuffer<SwarmCenterBuffer>>())
+        foreach (var (canon, localToWorld, localTransform)
+                 in SystemAPI.Query<RefRW<Canon>, RefRO<LocalToWorld>, RefRO<LocalTransform>>())
         {
+            Debug.DrawLine(localToWorld.ValueRO.Position, canon.ValueRO.Target, Color.red, 0.1f);
+
             if (canon.ValueRO.CurrentCoolDown >= canon.ValueRO.CoolDownTime && canon.ValueRO.IsAimingAtTarget)
             {
                 // for now just shoot at the first swarm center or forward when there is none just to debug
@@ -70,6 +80,7 @@ public partial struct CanonFireSystem : ISystem
                 });
 
                 canon.ValueRW.CurrentCoolDown = 0f;
+                canon.ValueRW.Target = float3.zero;
             }
             else
             {
@@ -94,33 +105,29 @@ public partial struct CanonFireSystem : ISystem
 public partial struct OrientateTurrentsJob : IJobEntity
 {
     public float deltaTime;
+    [ReadOnly] public NativeArray<LocalTransform> FighterTransforms;
 
-    void Execute(ref LocalTransform transform, ref Canon canon, in DynamicBuffer<SwarmCenterBuffer> swarmCenters, ref LocalToWorld localToWorld)
+    void Execute(ref LocalTransform transform, ref Canon canon, in LocalToWorld localToWorld)
     {
-        float3 direction;
+        float minDistSq = float.MaxValue;
+        float3 bestTarget = float3.zero;
 
-        if (swarmCenters.Length == 0)
+        foreach (var fighterTf in FighterTransforms)
         {
-            return;
-        }
-        else
-        {
-            // iterate through all swarm centers and chose the one closest to the canon
-            float minDistance = float.MaxValue;
-            float3 closestSwarmCenter = float3.zero;
-
-            foreach (var swarmCenter in swarmCenters)
+            float distSq = math.distancesq(localToWorld.Position, fighterTf.Position);
+            if (distSq < minDistSq)
             {
-                float distance = math.distance(localToWorld.Position, swarmCenter.Position);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    closestSwarmCenter = swarmCenter.Position;
-                }
+                minDistSq = distSq;
+                bestTarget = fighterTf.Position;
             }
-
-            direction = math.normalize(closestSwarmCenter - localToWorld.Position);
         }
+
+        canon.Target = bestTarget;
+
+        if (canon.Target.Equals(float3.zero))
+            return;
+
+        float3 direction = math.normalize(canon.Target - localToWorld.Position);
 
         // lerp the rotation of the canon to the direction of the closest swarm center  
         quaternion targetRotation = quaternion.LookRotationSafe(direction, math.up());
@@ -129,7 +136,7 @@ public partial struct OrientateTurrentsJob : IJobEntity
         // compare targetRotation and current rotation
         float angleDifference = math.degrees(math.acos(math.clamp(math.dot(transform.Rotation.value, targetRotation.value), -1f, 1f)));
 
-        if (angleDifference < 15f)
+        if (angleDifference < 35f)
         {
             canon.IsAimingAtTarget = true; // Consider aiming complete if the angle difference is less than 5 degrees
         }

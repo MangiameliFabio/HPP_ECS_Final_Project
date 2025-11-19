@@ -18,22 +18,18 @@ public class CanonAuthoring : MonoBehaviour
             { 
                 CoolDownTime = authoring.CoolDownTime,
                 CurrentCoolDown = authoring.CurrentCoolDown,
-                RotationSpeed = 0.25f
+                RotationSpeed = 3f
             });
-            AddBuffer<SwarmCenterBuffer>(entity);
-
         }
     }
 }
 
+// todo: add shooting radius
 public struct Canon : IComponentData
 {
     public float CoolDownTime;
     public float CurrentCoolDown;
     public float RotationSpeed;
     public bool IsAimingAtTarget;
-}
-public struct SwarmCenterBuffer : IBufferElementData
-{
-    public float3 Position;
+    public float3 Target;
 }

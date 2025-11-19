@@ -65,3 +65,9 @@ public struct HealthComponent : IComponentData
 {
     public float Health;
 }
+
+public struct TimedDestructionComponent : IComponentData
+{
+    public float lifeTime;
+    public float elapsedTime;
+}

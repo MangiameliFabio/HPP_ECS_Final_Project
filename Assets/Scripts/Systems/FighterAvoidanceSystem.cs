@@ -55,8 +55,17 @@ public partial struct FighterAvoidanceSystem : ISystem
             for (int i = 0; i < avoidanceBuffer.Length; i++)
             {
                 var avoidingEntity = avoidanceBuffer[i];
-                
+
+                // Skip if entity does not exist in LocalTransformLookup
+                if (!LocalTransformLookup.HasComponent(avoidingEntity.entity))
+                    continue;
+
                 float3 direction = LocalTransformLookup[avoidingEntity.entity].Position - localTransform.Position;
+
+                // Skip if entity does not have an AvoidanceSphere
+                if (!AvoidanceSphereLookup.HasComponent(avoidingEntity.entity))
+                    continue;
+
                 float distance = math.lengthsq(direction);
 
                 if (!(distance > 0f)) continue;

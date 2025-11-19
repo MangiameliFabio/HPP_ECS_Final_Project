@@ -26,6 +26,15 @@ public class StarDestroyerLaserAuthoring : MonoBehaviour
             {
                 Radius = sphere.radius * localTransform.localScale.x
             });
+            //AddComponent(entity, new HealthComponent
+            //{
+            //    Health = 1
+            //});
+            AddComponent(entity, new TimedDestructionComponent
+            {
+                lifeTime = 3f,
+                elapsedTime = 0f
+            });
         }
     }
 }

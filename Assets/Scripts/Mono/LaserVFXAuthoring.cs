@@ -14,8 +14,11 @@ public class LaserVFXAuthoring : MonoBehaviour
             AddComponent(entity, new LaserVFX
             {
             });
-            AddBuffer<SwarmCenterBuffer>(entity);
-
+            AddComponent(entity, new TimedDestructionComponent
+            {
+                lifeTime = 1f,
+                elapsedTime = 0f
+            });
         }
     }
 }
