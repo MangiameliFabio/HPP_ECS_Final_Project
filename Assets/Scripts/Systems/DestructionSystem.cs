@@ -1,4 +1,5 @@
 ﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 
@@ -15,20 +16,34 @@ public partial struct DestructionSystem : ISystem
         state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
 
-    [BurstCompile]
+
     public void OnUpdate(ref SystemState state)
     {
-        var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
-        var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-        
-        JobHandle combinedDeps = state.Dependency;
-        
-        var job = new DestroyJob
+        var ecb = new EntityCommandBuffer(Allocator.Temp);
+        foreach (var (health, entity) in SystemAPI.Query<RefRO<HealthComponent>>().WithEntityAccess())
         {
-            CommandBuffer = ecb.AsParallelWriter()
-        };
+            if (health.ValueRO.Health <= 0)
+            {
+                var buffer = state.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
+                
+                var linked = state.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
+                var entities = linked.Reinterpret<Entity>().AsNativeArray();
+                
+                ecb.DestroyEntity(entities);
+            }
+        }
 
-        state.Dependency = job.ScheduleParallel(combinedDeps);
+        ecb.Playback(state.EntityManager);
+        ecb.Dispose();
+
+        // JobHandle combinedDeps = state.Dependency;
+        //
+        // var job = new DestroyJob
+        // {
+        //     CommandBuffer = ecb.AsParallelWriter()
+        // };
+        //
+        // state.Dependency = job.Schedule(combinedDeps);
     }
     
     [BurstCompile]
@@ -41,10 +56,14 @@ public partial struct DestructionSystem : ISystem
 
         void Execute(Entity entity, in HealthComponent health)
         {
-            if (health.Health <= 0)
-            {
-                CommandBuffer.DestroyEntity(entity.Index, entity);
-            }
+            // if (health.Health <= 0)
+            // {
+            //     var buffer = systemState.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
+            //
+            //     CommandBuffer.DestroyEntity(buffer.AsNativeArray());
+            //     CommandBuffer.Playback(systemState.EntityManager);
+            //     CommandBuffer.Dispose();
+            // }
         }
     }
 }

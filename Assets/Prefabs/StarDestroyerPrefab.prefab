@@ -1216,6 +1216,7 @@ GameObject:
   - component: {fileID: 7827174913355212540}
   - component: {fileID: 8728162911875126161}
   - component: {fileID: 7335650685747766299}
+  - component: {fileID: 5916530240642883024}
   m_Layer: 0
   m_Name: StarDestroyerPrefab
   m_TagString: Untagged
@@ -1353,6 +1354,18 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 36.1
   m_Center: {x: 0, y: 0, z: -8.96}
+--- !u!114 &5916530240642883024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963303045119018114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c16549610bfe4458aa9389201d072bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Entities.Hybrid::Unity.Entities.Hybrid.Baking.LinkedEntityGroupAuthoring
 --- !u!1 &2036749299590126736
 GameObject:
   m_ObjectHideFlags: 0
