@@ -21,22 +21,23 @@ public partial struct CanonFireSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        
         var fighterQuery = SystemAPI.QueryBuilder()
-            .WithAll<Fighter, LocalTransform>()
+            .WithAll<Fighter, LocalTransform, LocalToWorld>()
             .Build();
 
-        var fighterTransforms = fighterQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
+        var fighterLocalToWorld = fighterQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
 
         var job = new OrientateTurrentsJob
         {
             deltaTime = SystemAPI.Time.DeltaTime,
-            FighterTransforms = fighterTransforms
+            FighterWorldTransform = fighterLocalToWorld
         };
 
         var orientJobHandle = job.ScheduleParallel(state.Dependency);
 
         state.Dependency = orientJobHandle;
-        state.Dependency = fighterTransforms.Dispose(state.Dependency);
+        state.Dependency = fighterLocalToWorld.Dispose(state.Dependency);
         orientJobHandle.Complete();
 
         // then shoot (initiate laser entities) on main thread
@@ -49,6 +50,9 @@ public partial struct CanonFireSystem : ISystem
         foreach (var (canon, localToWorld, localTransform)
                  in SystemAPI.Query<RefRW<Canon>, RefRO<LocalToWorld>, RefRO<LocalTransform>>())
         {
+            if (!canon.ValueRO.IsAimingAtTarget)
+                continue;
+
             Debug.DrawLine(localToWorld.ValueRO.Position, canon.ValueRO.Target, Color.red, 0.1f);
 
             if (canon.ValueRO.CurrentCoolDown >= canon.ValueRO.CoolDownTime && canon.ValueRO.IsAimingAtTarget)
@@ -105,27 +109,37 @@ public partial struct CanonFireSystem : ISystem
 public partial struct OrientateTurrentsJob : IJobEntity
 {
     public float deltaTime;
-    [ReadOnly] public NativeArray<LocalTransform> FighterTransforms;
+    [ReadOnly] public NativeArray<LocalToWorld> FighterWorldTransform;
+
 
     void Execute(ref LocalTransform transform, ref Canon canon, in LocalToWorld localToWorld)
     {
         float minDistSq = float.MaxValue;
         float3 bestTarget = float3.zero;
+        bool foundTarget = false;
 
-        foreach (var fighterTf in FighterTransforms)
+        foreach (var fighterTf in FighterWorldTransform)
         {
             float distSq = math.distancesq(localToWorld.Position, fighterTf.Position);
             if (distSq < minDistSq)
             {
-                minDistSq = distSq;
-                bestTarget = fighterTf.Position;
+                if (fighterTf.Position.y <= localToWorld.Position.y)
+                {
+                    minDistSq = distSq;
+                    bestTarget = fighterTf.Position;
+                    foundTarget = true;
+                }
             }
         }
 
-        canon.Target = bestTarget;
-
-        if (canon.Target.Equals(float3.zero))
+        if (!foundTarget)
+        {
+            canon.Target = float3.zero;
+            canon.IsAimingAtTarget = false;
             return;
+        }
+
+        canon.Target = bestTarget;
 
         float3 direction = math.normalize(canon.Target - localToWorld.Position);
 
