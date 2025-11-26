@@ -5,12 +5,11 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 using Unity.Collections;
-using Unity.IO.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Physics.Systems;
 
 public partial struct CanonFireSystem : ISystem
 {
-
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
@@ -21,26 +20,35 @@ public partial struct CanonFireSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        
+        // Query all fighters
         var fighterQuery = SystemAPI.QueryBuilder()
             .WithAll<Fighter, LocalTransform, LocalToWorld>()
             .Build();
 
         var fighterLocalToWorld = fighterQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
+        var fighterLocalTransform = fighterQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
+        var parentLocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
 
+        // Create job
         var job = new OrientateTurrentsJob
         {
             deltaTime = SystemAPI.Time.DeltaTime,
-            FighterWorldTransform = fighterLocalToWorld
+            FighterWorldTransform = fighterLocalToWorld,
+            FighterLocalTransform = fighterLocalTransform,
+            ParentLocalToWorldLookup = parentLocalToWorldLookup
         };
 
-        var orientJobHandle = job.ScheduleParallel(state.Dependency);
+        // Schedule
+        var jobHandle = job.ScheduleParallel(state.Dependency);
+        state.Dependency = jobHandle;
 
-        state.Dependency = orientJobHandle;
+        // Proper disposal
         state.Dependency = fighterLocalToWorld.Dispose(state.Dependency);
-        orientJobHandle.Complete();
+        state.Dependency = fighterLocalTransform.Dispose(state.Dependency);
 
-        // then shoot (initiate laser entities) on main thread
+        jobHandle.Complete();
+
+        // Shooting logic (main thread)
         var config = SystemAPI.GetSingleton<Config>();
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
@@ -55,20 +63,20 @@ public partial struct CanonFireSystem : ISystem
 
             Debug.DrawLine(localToWorld.ValueRO.Position, canon.ValueRO.Target, Color.red, 0.1f);
 
-            if (canon.ValueRO.CurrentCoolDown >= canon.ValueRO.CoolDownTime && canon.ValueRO.IsAimingAtTarget)
+            if (canon.ValueRO.CurrentCoolDown >= canon.ValueRO.CoolDownTime)
             {
-                // for now just shoot at the first swarm center or forward when there is none just to debug
                 var direction = math.normalize(localToWorld.ValueRO.Forward);
 
                 var laserEntity = ecb.Instantiate(config.CruiserLaserPrefab);
                 var vfxEntity = ecb.Instantiate(config.CruiserLaserBlastVFX);
+
                 ecb.SetComponent(vfxEntity, new LocalTransform
                 {
                     Position = localToWorld.ValueRO.Position,
                     Rotation = localToWorld.ValueRO.Rotation,
                     Scale = vfxTransform.Scale
                 });
-                ecb.SetComponent(vfxEntity, new LaserVFX { });
+                ecb.SetComponent(vfxEntity, new LaserVFX());
 
                 ecb.SetComponent(laserEntity, new LocalTransform
                 {
@@ -88,45 +96,45 @@ public partial struct CanonFireSystem : ISystem
             }
             else
             {
-                // increment cooldown
                 canon.ValueRW.CurrentCoolDown += SystemAPI.Time.DeltaTime;
             }
         }
-        
+
         ecb.Playback(state.EntityManager);
         ecb.Dispose();
     }
 
     [BurstCompile]
-    public void OnDestroy(ref SystemState state)
-    {
-
-    }
+    public void OnDestroy(ref SystemState state) { }
 }
 
-// rotate canon in swarm direction (maybe) and shoot
 [BurstCompile]
 public partial struct OrientateTurrentsJob : IJobEntity
 {
     public float deltaTime;
+
     [ReadOnly] public NativeArray<LocalToWorld> FighterWorldTransform;
+    [ReadOnly] public NativeArray<LocalTransform> FighterLocalTransform;
+    [ReadOnly] public ComponentLookup<LocalToWorld> ParentLocalToWorldLookup;
 
-
-    void Execute(ref LocalTransform transform, ref Canon canon, in LocalToWorld localToWorld)
+    [BurstCompile]
+    void Execute(ref LocalTransform transform, ref Canon canon, in LocalToWorld localToWorld, in Parent parent)
     {
         float minDistSq = float.MaxValue;
         float3 bestTarget = float3.zero;
         bool foundTarget = false;
 
-        foreach (var fighterTf in FighterWorldTransform)
+        for (int i = 0; i < FighterWorldTransform.Length; i++)
         {
-            float distSq = math.distancesq(localToWorld.Position, fighterTf.Position);
+            var fighterWorld = FighterWorldTransform[i];
+            float distSq = math.distancesq(localToWorld.Position, fighterWorld.Position);
             if (distSq < minDistSq)
             {
-                if (fighterTf.Position.y <= localToWorld.Position.y)
+                if ((canon.IsTop && fighterWorld.Position.y >= localToWorld.Position.y) ||
+                    (!canon.IsTop && fighterWorld.Position.y <= localToWorld.Position.y))
                 {
                     minDistSq = distSq;
-                    bestTarget = fighterTf.Position;
+                    bestTarget = fighterWorld.Position;
                     foundTarget = true;
                 }
             }
@@ -141,22 +149,34 @@ public partial struct OrientateTurrentsJob : IJobEntity
 
         canon.Target = bestTarget;
 
-        float3 direction = math.normalize(canon.Target - localToWorld.Position);
-
-        // lerp the rotation of the canon to the direction of the closest swarm center  
-        quaternion targetRotation = quaternion.LookRotationSafe(direction, math.up());
-        transform.Rotation = math.slerp(transform.Rotation, targetRotation, canon.RotationSpeed * deltaTime);
-        
-        // compare targetRotation and current rotation
-        float angleDifference = math.degrees(math.acos(math.clamp(math.dot(transform.Rotation.value, targetRotation.value), -1f, 1f)));
-
-        if (angleDifference < 35f)
+        // Get parent rotation
+        quaternion parentWorldRotation = quaternion.identity;
+        if (ParentLocalToWorldLookup.HasComponent(parent.Value))
         {
-            canon.IsAimingAtTarget = true; // Consider aiming complete if the angle difference is less than 5 degrees
+            parentWorldRotation = ParentLocalToWorldLookup[parent.Value].Rotation;
         }
-        else
+
+        // Compute desired world rotation
+        float3 direction = canon.Target - localToWorld.Position;
+        if (math.lengthsq(direction) < 0.0001f)
         {
             canon.IsAimingAtTarget = false;
+            return;
         }
+        direction = math.normalize(direction);
+        quaternion desiredWorldRotation = quaternion.LookRotationSafe(direction, math.up());
+
+        // Convert to local rotation
+        quaternion desiredLocalRotation = math.mul(math.inverse(parentWorldRotation), desiredWorldRotation);
+
+        // Lerp local rotation
+        float t = math.clamp(canon.RotationSpeed * deltaTime, 0f, 1f);
+        transform.Rotation = math.slerp(transform.Rotation, desiredLocalRotation, t);
+
+        // Optional: aiming accuracy check
+        float3 canonWorldForward = math.mul(parentWorldRotation, math.mul(transform.Rotation, new float3(0, 0, 1)));
+        float angleDifference = math.degrees(math.acos(math.clamp(math.dot(canonWorldForward, direction), -1f, 1f)));
+        canon.IsAimingAtTarget = angleDifference < 5f;
     }
+
 }

@@ -131,12 +131,12 @@ public partial struct FighterRayCastSystem : ISystem
                     fighter.ValueRW.LastShotTime = SystemAPI.Time.ElapsedTime;
 
                     float3 hitPoint = math.lerp(start, end, hit.Fraction);
-                    Debug.DrawLine(start, hitPoint, Color.red, 0.1f);
+                    //Debug.DrawLine(start, hitPoint, Color.red, 0.1f);
                 }
             }
             else
             {
-                Debug.DrawLine(start, end, Color.green, 0.1f);
+                //Debug.DrawLine(start, end, Color.green, 0.1f);
             }
         }
     }

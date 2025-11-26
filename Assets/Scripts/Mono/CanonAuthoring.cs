@@ -7,6 +7,7 @@ public class CanonAuthoring : MonoBehaviour
 {
     public float CoolDownTime;
     public float CurrentCoolDown;
+    public bool isTop;
 
     class Baker : Baker<CanonAuthoring>
     {
@@ -18,7 +19,8 @@ public class CanonAuthoring : MonoBehaviour
             { 
                 CoolDownTime = authoring.CoolDownTime,
                 CurrentCoolDown = authoring.CurrentCoolDown,
-                RotationSpeed = 3f
+                RotationSpeed = 3f,
+                IsTop = authoring.isTop,
             });
         }
     }
@@ -32,4 +34,5 @@ public struct Canon : IComponentData
     public float RotationSpeed;
     public bool IsAimingAtTarget;
     public float3 Target;
+    public bool IsTop;
 }
