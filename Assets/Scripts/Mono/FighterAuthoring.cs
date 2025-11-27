@@ -49,6 +49,7 @@ public class FighterAuthoring : MonoBehaviour
             
             AddBuffer<NearbyFighter>(entity);
             AddBuffer<AvoidingEntityBufferElement>(entity);
+            AddBuffer<HitBufferElement>(entity);
         }
     }
 }
@@ -88,4 +89,10 @@ public struct Fighter : IComponentData
 public struct NearbyFighter : IBufferElementData
 {
     public Entity entity;
+}
+
+public struct HitBufferElement : IBufferElementData
+{
+    public Entity TargetEntity;
+    public int Damage;
 }

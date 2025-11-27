@@ -1,7 +1,5 @@
-﻿using Unity.Burst;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 
 [UpdateAfter(typeof(FighterMovementSystem))]
 [UpdateAfter(typeof(FighterAvoidanceSystem))]
@@ -10,7 +8,7 @@ using Unity.Jobs;
 [UpdateAfter(typeof(StarDestroyerMovementSystem))]
 public partial struct DestructionSystem : ISystem
 {
-    [BurstCompile]
+
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
@@ -19,13 +17,29 @@ public partial struct DestructionSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
+        var healthLookup = SystemAPI.GetComponentLookup<HealthComponent>();
+        healthLookup.Update(ref state);
+        
+        foreach (var hitBuffer in 
+                 SystemAPI.Query<DynamicBuffer<HitBufferElement>>())
+        {
+            foreach (var hitBufferElement in hitBuffer)
+            {
+                if (!healthLookup.HasComponent(hitBufferElement.TargetEntity))
+                    continue;
+                
+                var health = healthLookup[hitBufferElement.TargetEntity];
+                health.Health -= hitBufferElement.Damage;
+                healthLookup[hitBufferElement.TargetEntity] = health;
+            }
+            hitBuffer.Clear();
+        }
+        
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         foreach (var (health, entity) in SystemAPI.Query<RefRO<HealthComponent>>().WithEntityAccess())
         {
             if (health.ValueRO.Health <= 0)
             {
-                var buffer = state.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
-                
                 var linked = state.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
                 var entities = linked.Reinterpret<Entity>().AsNativeArray();
                 
@@ -35,36 +49,9 @@ public partial struct DestructionSystem : ISystem
 
         ecb.Playback(state.EntityManager);
         ecb.Dispose();
-
-        // JobHandle combinedDeps = state.Dependency;
-        //
-        // var job = new DestroyJob
-        // {
-        //     CommandBuffer = ecb.AsParallelWriter()
-        // };
-        //
-        // state.Dependency = job.Schedule(combinedDeps);
     }
-    
-    [BurstCompile]
-    public void OnDestroy(ref SystemState state) { }
-    
-    [BurstCompile]
-    partial struct DestroyJob : IJobEntity
-    {
-        public EntityCommandBuffer.ParallelWriter CommandBuffer;
 
-        void Execute(Entity entity, in HealthComponent health)
-        {
-            // if (health.Health <= 0)
-            // {
-            //     var buffer = systemState.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
-            //
-            //     CommandBuffer.DestroyEntity(buffer.AsNativeArray());
-            //     CommandBuffer.Playback(systemState.EntityManager);
-            //     CommandBuffer.Dispose();
-            // }
-        }
+    public void OnDestroy(ref SystemState state)
+    {
     }
 }
-

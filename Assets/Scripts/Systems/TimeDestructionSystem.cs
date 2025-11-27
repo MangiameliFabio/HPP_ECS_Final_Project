@@ -45,7 +45,6 @@ public partial struct TimeDestructionSystem : ISystem
 
         void Execute(Entity entity, ref HealthComponent health, ref TimedDestructionComponent timedComponent)
         {
-            
             if (timedComponent.elapsedTime > timedComponent.lifeTime)
             {
                 CommandBuffer.DestroyEntity(entity.Index, entity);

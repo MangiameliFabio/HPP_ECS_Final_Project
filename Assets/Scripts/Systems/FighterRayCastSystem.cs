@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Physics;
 using Unity.Physics.Systems;
+using Unity.Jobs;
 
 public partial struct FighterRayCastSystem : ISystem
 {
@@ -13,68 +14,64 @@ public partial struct FighterRayCastSystem : ISystem
     {
         state.RequireForUpdate<PhysicsWorldSingleton>();
     }
-    
+
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
     }
-    
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var physicsWorldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
         ref PhysicsWorld physicsWorld = ref physicsWorldSingleton.PhysicsWorld;
-        var healthComponentLookup = SystemAPI.GetComponentLookup<HealthComponent>();
+        double elapsed = SystemAPI.Time.ElapsedTime;
 
-        var job = new NearbySearchJob()
+        var job = new RayCastFighterJob
         {
             CurrentPhysicsWorld = physicsWorld,
-            HealthComponentLookup = healthComponentLookup
+            ElapsedTime = elapsed,
         };
         
-        var handle = job.ScheduleParallel(state.Dependency);
-        state.Dependency = handle;
+        state.Dependency = job.ScheduleParallel(state.Dependency);
+        state.Dependency.Complete();
+        
+        var hitBufferLookup = SystemAPI.GetBufferLookup<HitBufferElement>();
+        hitBufferLookup.Update(ref state);
     }
 
     [BurstCompile]
-    partial struct NearbySearchJob : IJobEntity
+    partial struct RayCastFighterJob : IJobEntity
     {
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
-        [ReadOnly] public ComponentLookup<HealthComponent> HealthComponentLookup;
-        public float ElapsedTime;
+        public double ElapsedTime;
 
-        void Execute(ref LocalTransform localTransform,
-            ref Fighter fighter,
-            in Entity entity)
+        void Execute(ref LocalTransform localTransform, ref Fighter fighter, ref DynamicBuffer<HitBufferElement> hitBuffer, in Entity entity)
         {
             if (fighter.LastShotTime + fighter.FireCooldown > ElapsedTime)
                 return;
 
             float3 dir = math.normalize(localTransform.Forward());
             float3 start = localTransform.Position + dir * 10f;
-            float maxDistance = 100f;
-            float3 end = start + dir * maxDistance;
+            float3 end = start + dir * 100f;
 
-            var input = new RaycastInput
-            {
-                Start = start,
-                End = end,
-                Filter = CollisionFilter.Default
-            };
+            var input = new RaycastInput { Start = start, End = end, Filter = CollisionFilter.Default };
 
             if (CurrentPhysicsWorld.CollisionWorld.CastRay(input, out Unity.Physics.RaycastHit hit))
             {
-                Entity hitEntity = Entity.Null;
-                if (hit.RigidBodyIndex >= 0 && hit.RigidBodyIndex < CurrentPhysicsWorld.NumBodies)
-                {
-                    hitEntity = CurrentPhysicsWorld.Bodies[hit.RigidBodyIndex].Entity;
-                }
+                if (hit.RigidBodyIndex < 0 || hit.RigidBodyIndex >= CurrentPhysicsWorld.NumBodies)
+                    return;
 
-                if (HealthComponentLookup.HasComponent(hitEntity))
+                var body = CurrentPhysicsWorld.Bodies[hit.RigidBodyIndex];
+                Entity hitEntity = body.Entity;
+
+                if (hitEntity != Entity.Null && (body.CustomTags & (uint)PhysicsTags.StarDestroyer) != 0)
                 {
-                    var hc = HealthComponentLookup[hitEntity];
-                    hc.Health -= 1;
-                    HealthComponentLookup[hitEntity] = hc;
+                    hitBuffer.Add(new HitBufferElement()
+                    {
+                        TargetEntity = hitEntity,
+                        Damage = 1
+                    });
 
                     fighter.LastShotTime = ElapsedTime;
                 }

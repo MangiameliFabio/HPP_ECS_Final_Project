@@ -1,3 +1,4 @@
+using System.Linq;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -5,20 +6,43 @@ using Unity.Transforms;
 
 public partial struct ShipSpawnSystem : ISystem
 {
+    private EntityQuery _starDestroyerQuery;
+    private EntityQuery _fighterQuery;
+    
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<Config>();
-    }
 
+        _starDestroyerQuery = state.GetEntityQuery(ComponentType.ReadOnly<StarDestroyer>());
+        _fighterQuery = state.GetEntityQuery(ComponentType.ReadOnly<Fighter>());
+    }
+    
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var config = SystemAPI.GetSingleton<Config>();
-        
-        state.Enabled = false;
 
-        for (int i = 0; i < config.FighterCount; i++)
+        int currentDestroyerCount = _starDestroyerQuery.CalculateEntityCount();
+        var deltaShipCount = config.StarDestroyerCount - currentDestroyerCount;
+        
+        for (int i = 0; i < deltaShipCount; i++)
+        {
+            var destroyerEntity = state.EntityManager.Instantiate(config.StarDestroyerPrefab);
+        
+            var randomTransform =
+                TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation);
+            
+            if (state.EntityManager.HasComponent<LocalTransform>(destroyerEntity))
+            {
+                state.EntityManager.SetComponentData(destroyerEntity, randomTransform);    
+            }
+        }
+
+        int currentFighterCount = _fighterQuery.CalculateEntityCount();
+        deltaShipCount = config.FighterCount - currentFighterCount;
+
+        for (int i = 0; i < deltaShipCount; i++)
         {
             var fighterEntity = state.EntityManager.Instantiate(config.FighterPrefab);
 
