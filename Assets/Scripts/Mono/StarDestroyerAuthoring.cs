@@ -1,6 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Transforms;
 using UnityEngine;
 
 public class StarDestroyerAuthoring : MonoBehaviour
@@ -39,6 +40,12 @@ public class StarDestroyerAuthoring : MonoBehaviour
             AddComponent(entity, new HealthComponent()
             {
                 Health = authoring.health,
+            });
+            AddComponent(entity, new LocalTransform
+            {
+                Position = authoring.transform.position,
+                Rotation = authoring.transform.rotation,
+                Scale = 1f
             });
         }
     }

@@ -1305,7 +1305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d16fc31a34038646b6f9e1799a93630, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StarDestroyerAuthering
-  speed: 0.001
+  speed: 0.01
   movementProgress: 0
   point1:
     x: 0

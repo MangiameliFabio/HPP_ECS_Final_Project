@@ -4,12 +4,14 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
+using JetBrains.Annotations;
 
 public partial struct StarDestroyerMovementSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+
     }
 
     [BurstCompile]
@@ -32,12 +34,14 @@ public partial struct StarDestroyerMovementSystem : ISystem
     }
 }
 
+
 [BurstCompile]
 public partial struct MoveTowardsTargetPoint : IJobEntity
 {
     public float deltaTime;
     public float globalTime;
 
+    [BurstCompile]
     void Execute(ref LocalTransform transform, ref StarDestroyer starDestroyer)
     {
         float process = starDestroyer.MovementProcess + starDestroyer.Speed * deltaTime;
@@ -96,9 +100,9 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
 
         transform.Position = bezierPosition; // I'd prefer not setting the position but moving in the direction but for now this seems easier
     }
-
     float PseudoRandom(int starDestrpyerID, int callID, float globalTime)
     {
-        return math.frac(Mathf.Sin((starDestrpyerID + callID) * 12.9898f + (starDestrpyerID * globalTime)* 78.233f) * 43758.5453f);
+        return math.frac(Mathf.Sin((starDestrpyerID + callID) * 12.9898f + (starDestrpyerID * globalTime) * 78.233f) * 43758.5453f);
     }
 }
+

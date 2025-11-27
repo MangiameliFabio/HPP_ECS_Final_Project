@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
 public partial struct ShipSpawnSystem : ISystem
 {
@@ -31,11 +32,33 @@ public partial struct ShipSpawnSystem : ISystem
             var destroyerEntity = state.EntityManager.Instantiate(config.StarDestroyerPrefab);
         
             var randomTransform =
-                TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation);
-            
+                TransformUtils.CreateRandomTransform(config.MinSpawningBounds * 5, config.MaxSpawningBounds * 5, default);
+
             if (state.EntityManager.HasComponent<LocalTransform>(destroyerEntity))
             {
-                state.EntityManager.SetComponentData(destroyerEntity, randomTransform);    
+                state.EntityManager.SetComponentData(destroyerEntity, randomTransform);
+            }
+
+            if (state.EntityManager.HasComponent<StarDestroyer>(destroyerEntity))
+            {
+                var starDestroyer = state.EntityManager.GetComponentData<StarDestroyer>(destroyerEntity);
+
+                starDestroyer.ID = UnityEngine.Random.Range(1, int.MaxValue);
+
+                float3 newPoint0 = randomTransform.Position;
+                newPoint0.y = 0;
+
+                float3 newPoint1 = TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation).Position;
+                newPoint1.y = 0;
+
+                float3 newPoint2 = TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation).Position;
+                newPoint2.y = 0;
+
+                starDestroyer.Point1 = newPoint0;
+                starDestroyer.Point2 = newPoint1;
+                starDestroyer.Point3 = newPoint2;
+
+                state.EntityManager.SetComponentData(destroyerEntity, starDestroyer);
             }
         }
 

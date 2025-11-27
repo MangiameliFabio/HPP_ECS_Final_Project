@@ -29,7 +29,7 @@ public partial struct StarDestroyerExplosionSystem : ISystem
             [2] = new float3(-15f, 10f, -10f)
         };
 
-        foreach (var (health, localToWorld, starDestroyer) in SystemAPI.Query<RefRO<HealthComponent>, RefRO<LocalTransform>, RefRO<StarDestroyer>>())
+        foreach (var (health, localToWorld, starDestroyer, transform) in SystemAPI.Query<RefRO<HealthComponent>, RefRO<LocalTransform>, RefRO<StarDestroyer>, RefRW<LocalTransform>>())
         {
             var currentHealth = health.ValueRO.Health;
             var totalHealth = starDestroyer.ValueRO.Health;
@@ -40,6 +40,12 @@ public partial struct StarDestroyerExplosionSystem : ISystem
             if (currentHealth <= 0f)
             {
                 continue;
+            }
+
+            if (currentHealth <= totalHealth * 0.3)
+            {
+                // add a bit of rotation to the ship for visual effect
+                transform.ValueRW.Rotation = math.mul(transform.ValueRW.Rotation, quaternion.EulerXYZ(new float3(0f, 0f, math.sin((float)SystemAPI.Time.ElapsedTime * 5f) * 0.01f)));
             }
 
             // launch three if <= 10% health is reached
@@ -77,7 +83,7 @@ public partial struct StarDestroyerExplosionSystem : ISystem
         ecb.AddComponent(vfxEntity, new ExplosionVFX());
         ecb.AddComponent(vfxEntity, new TimedDestructionComponent
         {
-            lifeTime = 4f,
+            lifeTime = 2.5f,
             elapsedTime = 0f
         });
         ecb.AddComponent(vfxEntity, new HealthComponent
