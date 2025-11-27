@@ -61,7 +61,7 @@ public partial struct CanonFireSystem : ISystem
             if (!canon.ValueRO.IsAimingAtTarget)
                 continue;
 
-            Debug.DrawLine(localToWorld.ValueRO.Position, canon.ValueRO.Target, Color.red, 0.1f);
+            //Debug.DrawLine(localToWorld.ValueRO.Position, canon.ValueRO.Target, Color.red, 0.1f);
 
             if (canon.ValueRO.CurrentCoolDown >= canon.ValueRO.CoolDownTime)
             {
@@ -176,7 +176,6 @@ public partial struct OrientateTurrentsJob : IJobEntity
         // Optional: aiming accuracy check
         float3 canonWorldForward = math.mul(parentWorldRotation, math.mul(transform.Rotation, new float3(0, 0, 1)));
         float angleDifference = math.degrees(math.acos(math.clamp(math.dot(canonWorldForward, direction), -1f, 1f)));
-        canon.IsAimingAtTarget = angleDifference < 5f;
+        canon.IsAimingAtTarget = angleDifference < 10f;
     }
-
 }
