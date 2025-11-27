@@ -41,12 +41,6 @@ public class StarDestroyerAuthoring : MonoBehaviour
             {
                 Health = authoring.health,
             });
-            AddComponent(entity, new LocalTransform
-            {
-                Position = authoring.transform.position,
-                Rotation = authoring.transform.rotation,
-                Scale = 1f
-            });
         }
     }
 }
