@@ -11,9 +11,7 @@ public class LaserVFXAuthoring : MonoBehaviour
         {
             // GetEntity returns the Entity baked from the GameObject
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
-            AddComponent(entity, new LaserVFX
-            {
-            });
+            AddComponent(entity, new LaserVFX());
             AddComponent(entity, new TimedDestructionComponent
             {
                 lifeTime = 1f,

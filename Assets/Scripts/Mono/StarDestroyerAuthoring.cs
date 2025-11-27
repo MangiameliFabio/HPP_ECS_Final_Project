@@ -31,8 +31,8 @@ public class StarDestroyerAuthoring : MonoBehaviour
             });
             AddComponent(entity, new PhysicsCustomTags()
             {
-                //Set physics custom tag to "Avoid" and "Target"
-                Value = (int)(PhysicsTags.Avoid)
+                //Set physics custom tag to "Avoid" and "StarDestroyer"
+                Value = (int)PhysicsTags.Avoid | (int)PhysicsTags.StarDestroyer
             });
             AddComponent(entity, new TargetEntity());
             AddComponent(entity, new HealthComponent()
@@ -42,7 +42,6 @@ public class StarDestroyerAuthoring : MonoBehaviour
         }
     }
 }
-
 public struct StarDestroyer : IComponentData
 {
     public float Speed;

@@ -300,6 +300,10 @@ PrefabInstance:
       value: 0.013
       objectReference: {fileID: 0}
     - target: {fileID: 8728162911875126161, guid: a9886b06e471d5344b646b5cc4f2d2fa, type: 3}
+      propertyPath: health
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 8728162911875126161, guid: a9886b06e471d5344b646b5cc4f2d2fa, type: 3}
       propertyPath: point1.z
       value: -90
       objectReference: {fileID: 0}
@@ -381,6 +385,10 @@ PrefabInstance:
       value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 8728162911875126161, guid: a9886b06e471d5344b646b5cc4f2d2fa, type: 3}
+      propertyPath: health
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 8728162911875126161, guid: a9886b06e471d5344b646b5cc4f2d2fa, type: 3}
       propertyPath: point1.z
       value: -90
       objectReference: {fileID: 0}
@@ -416,6 +424,10 @@ PrefabInstance:
     - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: fighterCount
       value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
+      propertyPath: starDestroyerCount
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: spawningBounds.MaxBounds.x

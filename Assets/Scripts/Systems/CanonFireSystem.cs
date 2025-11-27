@@ -52,8 +52,8 @@ public partial struct CanonFireSystem : ISystem
         var config = SystemAPI.GetSingleton<Config>();
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        var laserTransform = state.EntityManager.GetComponentData<LocalTransform>(config.CruiserLaserPrefab);
-        var vfxTransform = state.EntityManager.GetComponentData<LocalTransform>(config.CruiserLaserBlastVFX);
+        var laserTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerLaserPrefab);
+        var vfxTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerBlastVFX);
 
         foreach (var (canon, localToWorld, localTransform)
                  in SystemAPI.Query<RefRW<Canon>, RefRO<LocalToWorld>, RefRO<LocalTransform>>())
@@ -67,8 +67,8 @@ public partial struct CanonFireSystem : ISystem
             {
                 var direction = math.normalize(localToWorld.ValueRO.Forward);
 
-                var laserEntity = ecb.Instantiate(config.CruiserLaserPrefab);
-                var vfxEntity = ecb.Instantiate(config.CruiserLaserBlastVFX);
+                var laserEntity = ecb.Instantiate(config.StarDestroyerLaserPrefab);
+                var vfxEntity = ecb.Instantiate(config.StarDestroyerBlastVFX);
 
                 ecb.SetComponent(vfxEntity, new LocalTransform
                 {
