@@ -18,6 +18,7 @@ public class ConfigAuthoring : MonoBehaviour
 
     [Header("VFX Prefabs")]
     public GameObject cruiserBlastPrefab;
+    public GameObject cruiserExplosionPrefab;
 
     [Header("Settings")]
     public int fighterCount;
@@ -37,6 +38,7 @@ public class ConfigAuthoring : MonoBehaviour
                 StarDestroyerPrefab = GetEntity(authoring.starDestroyerPrefab, TransformUsageFlags.Dynamic),
                 StarDestroyerLaserPrefab = GetEntity(authoring.starDestroyerLaserPrefab, TransformUsageFlags.Dynamic),
                 StarDestroyerBlastVFX = GetEntity(authoring.cruiserBlastPrefab, TransformUsageFlags.Dynamic),
+                CruiserExplosionVFX = GetEntity(authoring.cruiserExplosionPrefab, TransformUsageFlags.Dynamic),
                 FighterCount = authoring.fighterCount,
                 StarDestroyerCount = authoring.starDestroyerCount,
                 MaxSpawningBounds = authoring.spawningBounds.MaxBounds,
@@ -52,6 +54,7 @@ public struct Config : IComponentData
     public Entity StarDestroyerLaserPrefab;
     public Entity StarDestroyerBlastVFX;
     public Entity StarDestroyerPrefab;
+    public Entity CruiserExplosionVFX;
     public int FighterCount;
     public int StarDestroyerCount;
     public float3 MaxSpawningBounds;

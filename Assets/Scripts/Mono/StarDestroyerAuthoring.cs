@@ -27,7 +27,8 @@ public class StarDestroyerAuthoring : MonoBehaviour
                 Point1 = authoring.point1,
                 Point2 = authoring.point2,
                 Point3 = authoring.point3,
-                MovementRadius = authoring.movementRadius
+                MovementRadius = authoring.movementRadius,
+                Health = (int)authoring.health,
             });
             AddComponent(entity, new PhysicsCustomTags()
             {
@@ -51,4 +52,5 @@ public struct StarDestroyer : IComponentData
     public float3 Point3;
     public float MovementRadius;
     public int ID;
+    public int Health;
 }
