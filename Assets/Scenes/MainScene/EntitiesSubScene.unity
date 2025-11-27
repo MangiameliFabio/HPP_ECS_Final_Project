@@ -415,7 +415,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: fighterCount
-      value: 100
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: spawningBounds.MaxBounds.x
