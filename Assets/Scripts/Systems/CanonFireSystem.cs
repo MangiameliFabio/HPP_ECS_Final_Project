@@ -3,10 +3,8 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
-using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Physics.Systems;
 
 public partial struct CanonFireSystem : ISystem
 {
@@ -20,17 +18,20 @@ public partial struct CanonFireSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        // Query all fighters
+        // --- Prepare fighter arrays and lookup for the job ---
         var fighterQuery = SystemAPI.QueryBuilder()
             .WithAll<Fighter, LocalTransform, LocalToWorld>()
             .Build();
 
         var fighterLocalToWorld = fighterQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
         var fighterLocalTransform = fighterQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
-        var parentLocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
 
-        // Create job
-        var job = new OrientateTurrentsJob
+        // Prepare lookup and update it before scheduling
+        var parentLocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
+        parentLocalToWorldLookup.Update(ref state);
+
+        // Schedule orientation job
+        var orientJob = new OrientateTurrentsJob
         {
             deltaTime = SystemAPI.Time.DeltaTime,
             FighterWorldTransform = fighterLocalToWorld,
@@ -38,30 +39,31 @@ public partial struct CanonFireSystem : ISystem
             ParentLocalToWorldLookup = parentLocalToWorldLookup
         };
 
-        // Schedule
-        var jobHandle = job.ScheduleParallel(state.Dependency);
-        state.Dependency = jobHandle;
+        var jobHandle = orientJob.ScheduleParallel(state.Dependency);
 
-        // Proper disposal
-        state.Dependency = fighterLocalToWorld.Dispose(state.Dependency);
-        state.Dependency = fighterLocalTransform.Dispose(state.Dependency);
-
+        // Wait for job to finish before accessing/writing the same component data on main thread.
         jobHandle.Complete();
 
-        // Shooting logic (main thread)
-        var config = SystemAPI.GetSingleton<Config>();
-        var ecb = new EntityCommandBuffer(Allocator.Temp);
+        // Now it's safe to dispose arrays
+        fighterLocalToWorld.Dispose();
+        fighterLocalTransform.Dispose();
 
-        var laserTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerLaserPrefab);
-        var vfxTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerBlastVFX);
+        // --- Main-thread shooting logic ---
+        var config = SystemAPI.GetSingleton<Config>();
+
+        // Use end-sim ECB (do NOT call Playback; system will play it back)
+        var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+        var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
+
+        // Read transforms from prefab once (prefab entities exist in EntityManager)
+        var laserPrefabTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerLaserPrefab);
+        var vfxPrefabTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerBlastVFX);
 
         foreach (var (canon, localToWorld, localTransform)
                  in SystemAPI.Query<RefRW<Canon>, RefRO<LocalToWorld>, RefRO<LocalTransform>>())
         {
             if (!canon.ValueRO.IsAimingAtTarget)
                 continue;
-
-            //Debug.DrawLine(localToWorld.ValueRO.Position, canon.ValueRO.Target, Color.red, 0.1f);
 
             if (canon.ValueRO.CurrentCoolDown >= canon.ValueRO.CoolDownTime)
             {
@@ -70,27 +72,54 @@ public partial struct CanonFireSystem : ISystem
                 var laserEntity = ecb.Instantiate(config.StarDestroyerLaserPrefab);
                 var vfxEntity = ecb.Instantiate(config.StarDestroyerBlastVFX);
 
+                // Set/override LocalTransform for instantiated entities
+                // (Assuming prefab already has LocalTransform, use SetComponent; otherwise use AddComponent)
                 ecb.SetComponent(vfxEntity, new LocalTransform
                 {
                     Position = localToWorld.ValueRO.Position,
                     Rotation = localToWorld.ValueRO.Rotation,
-                    Scale = vfxTransform.Scale
+                    Scale = vfxPrefabTransform.Scale
                 });
-                ecb.SetComponent(vfxEntity, new LaserVFX());
+                // Add the VFX tag/component if prefab does not include it
+                ecb.AddComponent(vfxEntity, new LaserVFX());
 
+                // Add components that are likely not part of prefab archetype
+                ecb.AddComponent(vfxEntity, new TimedDestructionComponent
+                {
+                    lifeTime = 4f,
+                    elapsedTime = 0f
+                });
+                ecb.AddComponent(vfxEntity, new HealthComponent
+                {
+                    Health = 1f
+                });
+
+                // Laser entity transform & data
                 ecb.SetComponent(laserEntity, new LocalTransform
                 {
                     Position = localToWorld.ValueRO.Position,
                     Rotation = localToWorld.ValueRO.Rotation,
-                    Scale = 1f
+                    Scale = laserPrefabTransform.Scale
                 });
 
-                ecb.SetComponent(laserEntity, new LaserSD
+                // If LaserSD is not on the prefab archetype, AddComponent ; otherwise SetComponent
+                ecb.AddComponent(laserEntity, new LaserSD
                 {
                     Direction = direction,
                     Speed = 100f
                 });
 
+                ecb.AddComponent(laserEntity, new TimedDestructionComponent
+                {
+                    lifeTime = 4f,
+                    elapsedTime = 0f
+                });
+                ecb.AddComponent(laserEntity, new HealthComponent
+                {
+                    Health = 1f
+                });
+
+                // reset cooldown/target locally (we are on main thread; safe)
                 canon.ValueRW.CurrentCoolDown = 0f;
                 canon.ValueRW.Target = float3.zero;
             }
@@ -100,8 +129,7 @@ public partial struct CanonFireSystem : ISystem
             }
         }
 
-        ecb.Playback(state.EntityManager);
-        ecb.Dispose();
+        // No Playback() here — use EndSimulationEntityCommandBufferSystem playback
     }
 
     [BurstCompile]
@@ -117,7 +145,6 @@ public partial struct OrientateTurrentsJob : IJobEntity
     [ReadOnly] public NativeArray<LocalTransform> FighterLocalTransform;
     [ReadOnly] public ComponentLookup<LocalToWorld> ParentLocalToWorldLookup;
 
-    [BurstCompile]
     void Execute(ref LocalTransform transform, ref Canon canon, in LocalToWorld localToWorld, in Parent parent)
     {
         float minDistSq = float.MaxValue;
@@ -149,7 +176,7 @@ public partial struct OrientateTurrentsJob : IJobEntity
 
         canon.Target = bestTarget;
 
-        // Get parent rotation
+        // Get parent rotation safely
         quaternion parentWorldRotation = quaternion.identity;
         if (ParentLocalToWorldLookup.HasComponent(parent.Value))
         {

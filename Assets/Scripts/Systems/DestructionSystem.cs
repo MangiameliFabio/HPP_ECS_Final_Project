@@ -6,6 +6,9 @@ using Unity.Entities;
 [UpdateAfter(typeof(FighterSwarmSystem))]
 [UpdateAfter(typeof(LaserMoveSystem))]
 [UpdateAfter(typeof(StarDestroyerMovementSystem))]
+[UpdateAfter(typeof(StarDestroyerExplosionSystem))]
+[UpdateBefore(typeof(TimeDestructionSystem))]
+
 public partial struct DestructionSystem : ISystem
 {
 
