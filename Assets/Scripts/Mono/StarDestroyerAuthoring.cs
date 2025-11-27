@@ -34,12 +34,6 @@ public class StarDestroyerAuthoring : MonoBehaviour
                 //Set physics custom tag to "Avoid" and "Target"
                 Value = (int)(PhysicsTags.Avoid)
             });
-            var sphere = GetComponent<UnityEngine.SphereCollider>();
-            var localTransform = GetComponent<Transform>();
-            AddComponent(entity, new AvoidanceSphere()
-            {
-                Radius = sphere.radius * localTransform.localScale.x,
-            });
             AddComponent(entity, new TargetEntity());
             AddComponent(entity, new HealthComponent()
             {

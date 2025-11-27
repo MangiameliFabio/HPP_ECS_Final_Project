@@ -16,15 +16,12 @@ public partial struct FighterAvoidanceSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
-        var avoidanceSphereLookup = SystemAPI.GetComponentLookup<AvoidanceSphere>(true);
 
         localTransformLookup.Update(ref state);
-        avoidanceSphereLookup.Update(ref state);
 
         var job = new FighterAvoidanceJob
         {
             LocalTransformLookup = localTransformLookup,
-            AvoidanceSphereLookup = avoidanceSphereLookup
         };
 
         var handle = job.ScheduleParallel(state.Dependency);
@@ -40,9 +37,8 @@ public partial struct FighterAvoidanceSystem : ISystem
     partial struct FighterAvoidanceJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
-        [ReadOnly] public ComponentLookup<AvoidanceSphere> AvoidanceSphereLookup;
         
-        public void Execute(ref Fighter fighter, in LocalTransform localTransform, in DynamicBuffer<AvoidingEntity> avoidanceBuffer, in Entity entity)
+        public void Execute(ref Fighter fighter, in LocalTransform localTransform, in DynamicBuffer<AvoidingEntityBufferElement> avoidanceBuffer, in Entity entity)
         {
             float3 averageAvoidDir = float3.zero;
             
@@ -57,26 +53,18 @@ public partial struct FighterAvoidanceSystem : ISystem
                 var avoidingEntity = avoidanceBuffer[i];
 
                 // Skip if entity does not exist in LocalTransformLookup
-                if (!LocalTransformLookup.HasComponent(avoidingEntity.entity))
+                if (!LocalTransformLookup.HasComponent(avoidingEntity.AvoidingEntity))
                     continue;
 
-                float3 direction = LocalTransformLookup[avoidingEntity.entity].Position - localTransform.Position;
-
-                // Skip if entity does not have an AvoidanceSphere
-                if (!AvoidanceSphereLookup.HasComponent(avoidingEntity.entity))
-                    continue;
+                float3 direction = avoidingEntity.HitPosition - localTransform.Position;
 
                 float distance = math.lengthsq(direction);
 
                 if (!(distance > 0f)) continue;
                 direction = math.normalize(direction);
-
-                if (!AvoidanceSphereLookup.HasComponent(avoidingEntity.entity))
-                    continue;
-
-                float obstacleSphereRadius = AvoidanceSphereLookup[avoidingEntity.entity].Radius;
-                float maxRange = math.pow(fighter.NeighbourDetectionRadius + obstacleSphereRadius, 2f);
-                float distanceFactor = math.clamp(1 - distance / maxRange, 0, 1);
+                
+                float lerpedDistance = math.lerp(0f, math.pow(10f, 2f), distance);
+                float distanceFactor = math.clamp(lerpedDistance, 0, 1);
                     
                 averageAvoidDir += direction * distanceFactor;
             }
@@ -86,7 +74,8 @@ public partial struct FighterAvoidanceSystem : ISystem
     }
 }
 
-public struct AvoidingEntity : IBufferElementData
+public struct AvoidingEntityBufferElement : IBufferElementData
 {
-    public Entity entity;
+    public Entity AvoidingEntity;
+    public float3 HitPosition;
 }
