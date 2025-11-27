@@ -5,7 +5,6 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [BurstCompile]
 public partial struct NearbySearchSystem : ISystem
 {
@@ -37,7 +36,7 @@ public partial struct NearbySearchSystem : ISystem
         void Execute(ref LocalTransform localTransform,
                             ref Fighter fighter,
                             ref DynamicBuffer<NearbyFighter> swarmBuffer,
-                            ref DynamicBuffer<AvoidingEntity> avoidanceBuffer,
+                            ref DynamicBuffer<AvoidingEntityBufferElement> avoidanceBuffer,
                             in Entity entity)
         {
             swarmBuffer.Clear();
@@ -78,7 +77,11 @@ public partial struct NearbySearchSystem : ISystem
                 // Check if custom tag "Avoid" is set
                 if ((body.CustomTags & (uint)PhysicsTags.Avoid) != 0)
                 {
-                    avoidanceBuffer.Add(new AvoidingEntity { entity = hitEntity });
+                    avoidanceBuffer.Add(new AvoidingEntityBufferElement
+                    {
+                        AvoidingEntity = hitEntity,
+                        HitPosition = hit.Position,
+                    });
                 }
 
                 // Check if custom tag "Fighter" is set

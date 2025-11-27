@@ -19,13 +19,6 @@ public class StarDestroyerLaserAuthoring : MonoBehaviour
                 //Set physics custom tag to "Target"
                 Value = (int)PhysicsTags.Avoid
             });
-
-            var sphere = GetComponent<UnityEngine.SphereCollider>();
-            var localTransform = GetComponent<Transform>();
-            AddComponent(entity, new AvoidanceSphere
-            {
-                Radius = sphere.radius * localTransform.localScale.x
-            });
             //AddComponent(entity, new HealthComponent
             //{
             //    Health = 1

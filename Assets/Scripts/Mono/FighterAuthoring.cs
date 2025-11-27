@@ -48,7 +48,7 @@ public class FighterAuthoring : MonoBehaviour
             });
             
             AddBuffer<NearbyFighter>(entity);
-            AddBuffer<AvoidingEntity>(entity);
+            AddBuffer<AvoidingEntityBufferElement>(entity);
         }
     }
 }
