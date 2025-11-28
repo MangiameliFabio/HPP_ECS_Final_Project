@@ -111,7 +111,7 @@ public partial struct CanonFireSystem : ISystem
 
                 ecb.AddComponent(laserEntity, new TimedDestructionComponent
                 {
-                    lifeTime = 4f,
+                    lifeTime = 8f,
                     elapsedTime = 0f
                 });
                 ecb.AddComponent(laserEntity, new HealthComponent

@@ -30,6 +30,7 @@ public class StarDestroyerAuthoring : MonoBehaviour
                 Point3 = authoring.point3,
                 MovementRadius = authoring.movementRadius,
                 Health = (int)authoring.health,
+                HasJumpedInScene = false,
             });
             AddComponent(entity, new PhysicsCustomTags()
             {
@@ -54,4 +55,5 @@ public struct StarDestroyer : IComponentData
     public float MovementRadius;
     public int ID;
     public int Health;
+    public bool HasJumpedInScene;
 }

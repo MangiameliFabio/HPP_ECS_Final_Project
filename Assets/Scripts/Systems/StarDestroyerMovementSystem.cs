@@ -5,6 +5,7 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 using JetBrains.Annotations;
+using UnityEditor.Compilation;
 
 public partial struct StarDestroyerMovementSystem : ISystem
 {
@@ -43,6 +44,35 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
 
     [BurstCompile]
     void Execute(ref LocalTransform transform, ref StarDestroyer starDestroyer)
+    {
+        if (starDestroyer.HasJumpedInScene)
+        {
+            PatrolPoints(ref transform, ref starDestroyer);
+        }
+        else
+        {
+            // Lerp to first point  
+            float3 direction = starDestroyer.Point1 - transform.Position;
+            float distance = math.length(direction);
+
+            if (distance > 0.01f) // Threshold to stop lerping  
+            {
+                float3 step = math.normalize(direction) * 10000 * starDestroyer.Speed;
+                transform.Position += math.length(step) < distance ? step : direction;
+
+                //// Scale the transform based on distance  
+                //float scale = math.lerp(0, 1, 1 - math.saturate(distance / 5000)); // Assuming 100 is the max distance  
+                //transform.Scale = scale;
+            }
+            else
+            {
+                starDestroyer.HasJumpedInScene = true;
+                //transform.Scale = 1; // Ensure final scale is 1  
+            }
+        }
+    }
+
+    void PatrolPoints(ref LocalTransform transform, ref StarDestroyer starDestroyer)
     {
         float process = starDestroyer.MovementProcess + starDestroyer.Speed * deltaTime;
         starDestroyer.MovementProcess = process;
@@ -96,10 +126,17 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
         {
             quaternion targetRotation = quaternion.LookRotationSafe(math.normalize(tangent), math.up());
             transform.Rotation = math.slerp(transform.Rotation, targetRotation, 0.1f);
+
+            // Ensure the shortest rotation path is taken to avoid flipping
+            if (math.dot(transform.Rotation.value, targetRotation.value) < 0)
+            {
+                targetRotation.value = -targetRotation.value;
+            }
         }
 
         transform.Position = bezierPosition; // I'd prefer not setting the position but moving in the direction but for now this seems easier
     }
+
     float PseudoRandom(int starDestrpyerID, int callID, float globalTime)
     {
         return math.frac(Mathf.Sin((starDestrpyerID + callID) * 12.9898f + (starDestrpyerID * globalTime) * 78.233f) * 43758.5453f);

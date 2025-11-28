@@ -34,6 +34,23 @@ public partial struct ShipSpawnSystem : ISystem
             var randomTransform =
                 TransformUtils.CreateRandomTransform(config.MinSpawningBounds * 5, config.MaxSpawningBounds * 5, default);
 
+            float3 newPoint0 = randomTransform.Position;
+            newPoint0.y = 0;
+
+            float3 newPoint1 = TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation).Position;
+            newPoint1.y = 0;
+
+            float3 newPoint2 = TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation).Position;
+            newPoint2.y = 0;
+
+            var startDirection = math.normalize(newPoint1 - newPoint0);
+
+            // position the cruiser off-screen so that it can hyperjump in
+            // direction of second point - first point
+            randomTransform.Position += -startDirection * 5000f;
+
+            randomTransform.Rotation = quaternion.LookRotationSafe(startDirection, math.up());
+
             if (state.EntityManager.HasComponent<LocalTransform>(destroyerEntity))
             {
                 state.EntityManager.SetComponentData(destroyerEntity, randomTransform);
@@ -45,18 +62,11 @@ public partial struct ShipSpawnSystem : ISystem
 
                 starDestroyer.ID = UnityEngine.Random.Range(1, int.MaxValue);
 
-                float3 newPoint0 = randomTransform.Position;
-                newPoint0.y = 0;
-
-                float3 newPoint1 = TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation).Position;
-                newPoint1.y = 0;
-
-                float3 newPoint2 = TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation).Position;
-                newPoint2.y = 0;
-
                 starDestroyer.Point1 = newPoint0;
                 starDestroyer.Point2 = newPoint1;
                 starDestroyer.Point3 = newPoint2;
+
+                starDestroyer.HasJumpedInScene = false;
 
                 state.EntityManager.SetComponentData(destroyerEntity, starDestroyer);
             }
