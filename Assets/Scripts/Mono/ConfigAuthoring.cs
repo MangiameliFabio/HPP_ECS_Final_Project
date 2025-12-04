@@ -20,6 +20,7 @@ public class ConfigAuthoring : MonoBehaviour
     [Header("VFX Prefabs")]
     public GameObject cruiserBlastPrefab;
     public GameObject cruiserExplosionPrefab;
+    public GameObject fighterExplosionPrefab;
 
     [Header("Settings")]
     public int fighterCount;
@@ -42,6 +43,7 @@ public class ConfigAuthoring : MonoBehaviour
                 StarDestroyerLaserPrefab = GetEntity(authoring.starDestroyerLaserPrefab, TransformUsageFlags.Dynamic),
                 StarDestroyerBlastVFX = GetEntity(authoring.cruiserBlastPrefab, TransformUsageFlags.Dynamic),
                 CruiserExplosionVFX = GetEntity(authoring.cruiserExplosionPrefab, TransformUsageFlags.Dynamic),
+                FighterExplosionVFX = GetEntity(authoring.fighterExplosionPrefab, TransformUsageFlags.Dynamic),
                 FighterCount = authoring.fighterCount,
                 StarDestroyerCount = authoring.starDestroyerCount,
                 AsteroidCount = authoring.asteroidCount,
@@ -60,6 +62,7 @@ public struct Config : IComponentData
     public Entity StarDestroyerPrefab;
     public Entity AsteroidPrefab;
     public Entity CruiserExplosionVFX;
+    public Entity FighterExplosionVFX;
     public int FighterCount;
     public int StarDestroyerCount;
     public int AsteroidCount;

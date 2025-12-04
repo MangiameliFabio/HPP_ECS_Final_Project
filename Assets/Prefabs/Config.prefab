@@ -47,10 +47,13 @@ MonoBehaviour:
   fighterPrefab: {fileID: 2596844315948211788, guid: d552407e146d1bc40acc216cb9d2efbb, type: 3}
   starDestroyerLaserPrefab: {fileID: 5188235913935746775, guid: 87f59d88af28f5d46b1581a4cb1c6d3b, type: 3}
   starDestroyerPrefab: {fileID: 1963303045119018114, guid: a9886b06e471d5344b646b5cc4f2d2fa, type: 3}
+  asteroidPrefab: {fileID: 0}
   cruiserBlastPrefab: {fileID: 735791215212252079, guid: 4c6fdb9f067252c40b7c2b9a4a3571f0, type: 3}
   cruiserExplosionPrefab: {fileID: 7531846442927558533, guid: ebef0792523de2d43998fdc01d969b62, type: 3}
+  fighterExplosionPrefab: {fileID: 7531846442927558533, guid: e8d43709a158e734d91e789e6e5b3a7e, type: 3}
   fighterCount: 1000
   starDestroyerCount: 0
+  asteroidCount: 0
   spawningBounds:
     MaxBounds:
       x: 0

@@ -1,25 +1,16 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 
-[UpdateAfter(typeof(FighterMovementSystem))]
-[UpdateAfter(typeof(FighterAvoidanceSystem))]
-[UpdateAfter(typeof(FighterSwarmSystem))]
-[UpdateAfter(typeof(LaserMoveSystem))]
-[UpdateAfter(typeof(StarDestroyerMovementSystem))]
-[UpdateAfter(typeof(StarDestroyerExplosionSystem))]
-[UpdateAfter(typeof(AsteroidMovementSystem))]
-[UpdateAfter(typeof(SimpleExplosionSystem))]
-[UpdateAfter(typeof(LaserCollisionSystem))]
 [UpdateBefore(typeof(TimeDestructionSystem))]
+[UpdateAfter(typeof(SimpleExplosionSystem))]
+[UpdateAfter(typeof(DamageSystemOdd))]
 
 public partial struct DestructionSystem : ISystem
 {
-
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
-
 
     public void OnUpdate(ref SystemState state)
     {
