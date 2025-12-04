@@ -15,6 +15,7 @@ public class ConfigAuthoring : MonoBehaviour
     public GameObject fighterPrefab;
     public GameObject starDestroyerLaserPrefab;
     public GameObject starDestroyerPrefab;
+    public GameObject asteroidPrefab;
 
     [Header("VFX Prefabs")]
     public GameObject cruiserBlastPrefab;
@@ -23,6 +24,7 @@ public class ConfigAuthoring : MonoBehaviour
     [Header("Settings")]
     public int fighterCount;
     public int starDestroyerCount;
+    public int asteroidCount;
 
     [Header("Spawning Bounds")]
     public SpawningBounds spawningBounds;
@@ -36,11 +38,13 @@ public class ConfigAuthoring : MonoBehaviour
             {
                 FighterPrefab = GetEntity(authoring.fighterPrefab, TransformUsageFlags.Dynamic),
                 StarDestroyerPrefab = GetEntity(authoring.starDestroyerPrefab, TransformUsageFlags.Dynamic),
+                AsteroidPrefab = GetEntity(authoring.asteroidPrefab, TransformUsageFlags.Dynamic),
                 StarDestroyerLaserPrefab = GetEntity(authoring.starDestroyerLaserPrefab, TransformUsageFlags.Dynamic),
                 StarDestroyerBlastVFX = GetEntity(authoring.cruiserBlastPrefab, TransformUsageFlags.Dynamic),
                 CruiserExplosionVFX = GetEntity(authoring.cruiserExplosionPrefab, TransformUsageFlags.Dynamic),
                 FighterCount = authoring.fighterCount,
                 StarDestroyerCount = authoring.starDestroyerCount,
+                AsteroidCount = authoring.asteroidCount,
                 MaxSpawningBounds = authoring.spawningBounds.MaxBounds,
                 MinSpawningBounds = authoring.spawningBounds.MinBounds,
             });
@@ -54,9 +58,11 @@ public struct Config : IComponentData
     public Entity StarDestroyerLaserPrefab;
     public Entity StarDestroyerBlastVFX;
     public Entity StarDestroyerPrefab;
+    public Entity AsteroidPrefab;
     public Entity CruiserExplosionVFX;
     public int FighterCount;
     public int StarDestroyerCount;
+    public int AsteroidCount;
     public float3 MaxSpawningBounds;
     public float3 MinSpawningBounds;
 }
