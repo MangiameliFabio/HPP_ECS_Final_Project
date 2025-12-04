@@ -48,6 +48,8 @@ public partial struct FighterRayCastSystem : ISystem
 
         void Execute(ref LocalTransform localTransform, ref Fighter fighter, ref DynamicBuffer<HitBufferElement> hitBuffer, in Entity entity)
         {
+            fighter.IsShooting = false;
+
             if (fighter.LastShotTime + fighter.FireCooldown > ElapsedTime)
                 return;
 
@@ -72,6 +74,10 @@ public partial struct FighterRayCastSystem : ISystem
                         TargetEntity = hitEntity,
                         Damage = 1
                     });
+
+                    fighter.IsShooting = true;
+                    fighter.BeamStart = start;
+                    fighter.BeamEnd = hit.Position;
 
                     fighter.LastShotTime = ElapsedTime;
                 }

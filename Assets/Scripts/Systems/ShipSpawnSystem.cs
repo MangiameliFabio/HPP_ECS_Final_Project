@@ -32,7 +32,7 @@ public partial struct ShipSpawnSystem : ISystem
             var destroyerEntity = state.EntityManager.Instantiate(config.StarDestroyerPrefab);
         
             var randomTransform =
-                TransformUtils.CreateRandomTransform(config.MinSpawningBounds * 5, config.MaxSpawningBounds * 5, default);
+                TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, default);
 
             float3 newPoint0 = randomTransform.Position;
             newPoint0.y = 0;

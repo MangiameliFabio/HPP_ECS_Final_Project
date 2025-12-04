@@ -57,7 +57,7 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
 
             if (distance > 0.01f) // Threshold to stop lerping  
             {
-                float3 step = math.normalize(direction) * 10000 * starDestroyer.Speed;
+                float3 step = math.normalize(direction) * 5000 * starDestroyer.Speed;
                 transform.Position += math.length(step) < distance ? step : direction;
 
                 //// Scale the transform based on distance  

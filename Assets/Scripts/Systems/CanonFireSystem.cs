@@ -18,7 +18,6 @@ public partial struct CanonFireSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        // --- Prepare fighter arrays and lookup for the job ---
         var fighterQuery = SystemAPI.QueryBuilder()
             .WithAll<Fighter, LocalTransform, LocalToWorld>()
             .Build();
@@ -26,11 +25,9 @@ public partial struct CanonFireSystem : ISystem
         var fighterLocalToWorld = fighterQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
         var fighterLocalTransform = fighterQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
 
-        // Prepare lookup and update it before scheduling
         var parentLocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
         parentLocalToWorldLookup.Update(ref state);
 
-        // Schedule orientation job
         var orientJob = new OrientateTurrentsJob
         {
             deltaTime = SystemAPI.Time.DeltaTime,
@@ -41,21 +38,16 @@ public partial struct CanonFireSystem : ISystem
 
         var jobHandle = orientJob.ScheduleParallel(state.Dependency);
 
-        // Wait for job to finish before accessing/writing the same component data on main thread.
         jobHandle.Complete();
 
-        // Now it's safe to dispose arrays
         fighterLocalToWorld.Dispose();
         fighterLocalTransform.Dispose();
 
-        // --- Main-thread shooting logic ---
         var config = SystemAPI.GetSingleton<Config>();
 
-        // Use end-sim ECB (do NOT call Playback; system will play it back)
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-        // Read transforms from prefab once (prefab entities exist in EntityManager)
         var laserPrefabTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerLaserPrefab);
         var vfxPrefabTransform = state.EntityManager.GetComponentData<LocalTransform>(config.StarDestroyerBlastVFX);
 
@@ -72,18 +64,14 @@ public partial struct CanonFireSystem : ISystem
                 var laserEntity = ecb.Instantiate(config.StarDestroyerLaserPrefab);
                 var vfxEntity = ecb.Instantiate(config.StarDestroyerBlastVFX);
 
-                // Set/override LocalTransform for instantiated entities
-                // (Assuming prefab already has LocalTransform, use SetComponent; otherwise use AddComponent)
                 ecb.SetComponent(vfxEntity, new LocalTransform
                 {
                     Position = localToWorld.ValueRO.Position,
                     Rotation = localToWorld.ValueRO.Rotation,
                     Scale = vfxPrefabTransform.Scale
                 });
-                // Add the VFX tag/component if prefab does not include it
                 ecb.AddComponent(vfxEntity, new LaserVFX());
 
-                // Add components that are likely not part of prefab archetype
                 ecb.AddComponent(vfxEntity, new TimedDestructionComponent
                 {
                     lifeTime = 4f,
@@ -129,8 +117,6 @@ public partial struct CanonFireSystem : ISystem
                 canon.ValueRW.CurrentCoolDown += SystemAPI.Time.DeltaTime;
             }
         }
-
-        // No Playback() here � use EndSimulationEntityCommandBufferSystem playback
     }
 
     [BurstCompile]

@@ -88,6 +88,10 @@ public struct Fighter : IComponentData
     public Entity TargetEntity;
     public double FireCooldown;
     public double LastShotTime;
+
+    public bool IsShooting;
+    public float3 BeamStart;
+    public float3 BeamEnd;
 }
 
 public struct NearbyFighter : IBufferElementData

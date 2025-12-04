@@ -12,11 +12,18 @@ public class HyperspeedJumpVFXAuthoring : MonoBehaviour
             // GetEntity returns the Entity baked from the GameObject
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
             AddComponent(entity, new HyperspeedJumpVFX());
+            
+            //AddComponent(entity, new HealthComponent
+            //{
+            //    Health = 1f
+            //});
+
             AddComponent(entity, new TimedDestructionComponent
             {
                 lifeTime = 0.3f,
                 elapsedTime = 0f
             });
+
         }
     }
 }
