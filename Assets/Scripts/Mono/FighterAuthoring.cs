@@ -18,6 +18,7 @@ public class FighterAuthoring : MonoBehaviour
     public float targetTrendFactor = 1f;
     public float targetMinDistance = 50f;
     public double fireCooldown = 5;
+    public float fighterHealth = 1;
     
     class Baker : Baker<FighterAuthoring>
     {
@@ -46,7 +47,10 @@ public class FighterAuthoring : MonoBehaviour
                 //Set physics custom tag to "Fighter"
                 Value = (int)PhysicsTags.Fighter
             });
-            
+            AddComponent(entity, new HealthComponent()
+            {
+                Health = authoring.fighterHealth
+            });
             AddBuffer<NearbyFighter>(entity);
             AddBuffer<AvoidingEntityBufferElement>(entity);
             AddBuffer<HitBufferElement>(entity);

@@ -47,7 +47,7 @@ public partial struct ShipSpawnSystem : ISystem
 
             // position the cruiser off-screen so that it can hyperjump in
             // direction of second point - first point
-            randomTransform.Position += -startDirection * 5000f;
+            randomTransform.Position += -startDirection * 5000;
 
             randomTransform.Rotation = quaternion.LookRotationSafe(startDirection, math.up());
 

@@ -8,7 +8,7 @@ using Unity.Collections;
 using static UnityEngine.Rendering.STP;
 using static UnityEngine.EventSystems.EventTrigger;
 
-public partial struct StarDestroyerExplosionSystem : ISystem
+public partial struct SimpleExplosionSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -22,49 +22,20 @@ public partial struct StarDestroyerExplosionSystem : ISystem
         var config = SystemAPI.GetSingleton<Config>();
         var ecb = new EntityCommandBuffer(Allocator.Temp);
 
-        var positionOffsets = new NativeArray<float3>(3, Allocator.Temp)
-        {
-            [0] = new float3(35f, 0f, 0f),
-            [1] = new float3(-20f, 0f, 15f),
-            [2] = new float3(-15f, 10f, -10f)
-        };
-
-        foreach (var (health, localToWorld, starDestroyer, transform) in SystemAPI.Query<RefRO<HealthComponent>, RefRO<LocalTransform>, RefRO<StarDestroyer>, RefRW<LocalTransform>>())
+        foreach (var (health, localToWorld, transform) 
+                 in SystemAPI.Query<RefRO<HealthComponent>, RefRO<LocalToWorld>, RefRW<LocalTransform>>()
+                     .WithAny<Fighter, Asteroid>())
         {
             var currentHealth = health.ValueRO.Health;
-            var totalHealth = starDestroyer.ValueRO.Health;
+            if (currentHealth > 0f)
+            {
+                continue;
+            }
             
             var currentPosition = localToWorld.ValueRO.Position;
-
-
-            if (currentHealth <= 0f)
-            {
-                continue;
-            }
-
-            if (currentHealth <= totalHealth * 0.3)
-            {
-                // add a bit of rotation to the ship for visual effect
-                transform.ValueRW.Rotation = math.mul(transform.ValueRW.Rotation, quaternion.EulerXYZ(new float3(0f, 0f, math.sin((float)SystemAPI.Time.ElapsedTime * 5f) * 0.01f)));
-            }
-
-            // launch three if <= 10% health is reached
-            if (currentHealth <= totalHealth * 0.1f && currentHealth >= totalHealth * 0.05)
-            {
-                TriggerExplosion(ecb, config, ref state, currentPosition + positionOffsets[0]);
-                TriggerExplosion(ecb, config, ref state, currentPosition + positionOffsets[1]);
-                TriggerExplosion(ecb, config, ref state, currentPosition + positionOffsets[2]);
-                continue;
-            }
-
-            // launch one explosion when 30% health is reached
-            if (currentHealth <= totalHealth * 0.2f && currentHealth >= totalHealth * 0.15)
-            {
-                TriggerExplosion(ecb, config, ref state, currentPosition);
-            }
+            
+            TriggerExplosion(ecb, config, ref state, currentPosition);
         }
-
-        positionOffsets.Dispose();
 
         ecb.Playback(state.EntityManager);
         ecb.Dispose();

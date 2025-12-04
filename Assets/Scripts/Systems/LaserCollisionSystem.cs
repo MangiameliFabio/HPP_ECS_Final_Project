@@ -6,7 +6,7 @@ using Unity.Physics;
 using Unity.Transforms;
 
 [BurstCompile]
-public partial struct AsteroidCollisionSystem : ISystem
+public partial struct LaserCollisionSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
@@ -19,7 +19,7 @@ public partial struct AsteroidCollisionSystem : ISystem
         var physicsSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
         ref var physicsWorld = ref physicsSingleton.PhysicsWorld;
 
-        var job = new AsteroidCollisionJob()
+        var job = new LaserCollisionJob()
         {
             CurrentPhysicsWorld = physicsWorld
         };
@@ -29,20 +29,19 @@ public partial struct AsteroidCollisionSystem : ISystem
     }
 
     [BurstCompile]
-    partial struct AsteroidCollisionJob : IJobEntity
+    partial struct LaserCollisionJob : IJobEntity
     {
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
 
         void Execute(ref LocalTransform localTransform,
-                            ref Asteroid asteroid,
+                            in LaserSD laser,
                             ref DynamicBuffer<HitBufferElement> hitBuffer,
-                            ref HealthComponent health,
                             in Entity entity)
         {
             hitBuffer.Clear();
 
             float3 center = localTransform.Position;
-            float radiusVal = asteroid.UnscaledAsteroidRadius * localTransform.Scale;
+            float radiusVal = 20f;
 
             var pInput = new PointDistanceInput
             {
@@ -79,10 +78,6 @@ public partial struct AsteroidCollisionSystem : ISystem
                         TargetEntity = hitEntity,
                         Damage = 1,
                     });
-                }
-                else
-                {
-                    health.Health -= 1;
                 }
             }
 

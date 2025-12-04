@@ -118,6 +118,7 @@ public partial struct CanonFireSystem : ISystem
                 {
                     Health = 1f
                 });
+                ecb.AddBuffer<HitBufferElement>(laserEntity);
 
                 // reset cooldown/target locally (we are on main thread; safe)
                 canon.ValueRW.CurrentCoolDown = 0f;
@@ -129,7 +130,7 @@ public partial struct CanonFireSystem : ISystem
             }
         }
 
-        // No Playback() here — use EndSimulationEntityCommandBufferSystem playback
+        // No Playback() here ï¿½ use EndSimulationEntityCommandBufferSystem playback
     }
 
     [BurstCompile]
