@@ -1,7 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 
-[UpdateBefore(typeof(TimeDestructionSystem))]
+[UpdateAfter(typeof(TimeDestructionSystem))]
 [UpdateAfter(typeof(SimpleExplosionSystem))]
 [UpdateAfter(typeof(DamageSystemOdd))]
 

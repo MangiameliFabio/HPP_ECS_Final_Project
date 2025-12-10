@@ -8,17 +8,28 @@ using UnityEngine;
 using Material = Unity.Physics.Material;
 using Random = Unity.Mathematics.Random;
 using SphereCollider = Unity.Physics.SphereCollider;
+using Collider = Unity.Physics.Collider;
 
 public partial struct AsteroidSpawnSystem : ISystem
 {
     Random random;
-    
+    BlobAssetReference<Collider> asteroidCollider;
+    float radius;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<Config>();
         
         random = new Random(1337);
+
+
+        radius = 45f;
+        var sphereGeometry = new SphereGeometry { Center = float3.zero, Radius = radius };
+        var material = new Material { Friction = 0f, Restitution = 0.5f };
+        var filter = new CollisionFilter { BelongsTo = 16 << 0, CollidesWith = 16 << 0 };
+    
+     asteroidCollider = SphereCollider.Create(sphereGeometry, filter, material);
     }
     
     [BurstCompile]
@@ -38,35 +49,13 @@ public partial struct AsteroidSpawnSystem : ISystem
             randomTransform.Scale = RandomFloat(0.15f, 0.5f);
             state.EntityManager.SetComponentData(asteroidEntity, randomTransform);
 
-            var sphereGeometry = new SphereGeometry
-            {
-                Center = float3.zero,
-                Radius = 45
-            };
-            var material = new Material
-            {
-                Friction = 0f,
-                Restitution = 0.5f
-            };
-            var asteroidFilter = new CollisionFilter
-            {
-                BelongsTo =  16 << 0,
-                CollidesWith =  16 << 0,
-                GroupIndex = 0
-            };
-            var sphere = SphereCollider.Create(
-                sphereGeometry,
-                asteroidFilter,
-                material
-            );
-
             state.EntityManager.SetComponentData(asteroidEntity, new PhysicsCollider
             {
-                Value = sphere
+                Value = asteroidCollider,
             });
-            
+
             var asteroidComponentData = state.EntityManager.GetComponentData<Asteroid>(asteroidEntity);
-            asteroidComponentData.SphereRadius = sphereGeometry.Radius;
+            asteroidComponentData.SphereRadius = radius;
             state.EntityManager.SetComponentData(asteroidEntity, asteroidComponentData);
             
             if (state.EntityManager.HasComponent<PhysicsVelocity>(asteroidEntity))
@@ -93,7 +82,10 @@ public partial struct AsteroidSpawnSystem : ISystem
     [BurstCompile]
     public void OnDestroy(ref SystemState state)
     {
-        
+        if (asteroidCollider.IsCreated)
+        {
+            asteroidCollider.Dispose();
+        }
     }
     
     private float3 RandomFloat3(float min, float max)

@@ -40,10 +40,9 @@ public partial struct CanonFireSystem : ISystem
         var config = SystemAPI.GetSingleton<Config>();
         var jobHandle = config.RunParallel ? orientJob.ScheduleParallel(state.Dependency) : orientJob.Schedule(state.Dependency);
 
-        jobHandle.Complete();
+        state.Dependency = jobHandle;
 
-        fighterLocalToWorld.Dispose();
-        fighterLocalTransform.Dispose();
+        jobHandle.Complete();
 
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
@@ -74,7 +73,7 @@ public partial struct CanonFireSystem : ISystem
 
                 ecb.AddComponent(vfxEntity, new TimedDestructionComponent
                 {
-                    lifeTime = 4f,
+                    lifeTime = 1f,
                     elapsedTime = 0f
                 });
                 ecb.AddComponent(vfxEntity, new HealthComponent
@@ -99,7 +98,7 @@ public partial struct CanonFireSystem : ISystem
 
                 ecb.AddComponent(laserEntity, new TimedDestructionComponent
                 {
-                    lifeTime = 8f,
+                    lifeTime = 0.5f,
                     elapsedTime = 0f
                 });
                 ecb.AddComponent(laserEntity, new HealthComponent
@@ -128,8 +127,8 @@ public partial struct OrientateTurrentsJob : IJobEntity
 {
     public float deltaTime;
 
-    [ReadOnly] public NativeArray<LocalToWorld> FighterWorldTransform;
-    [ReadOnly] public NativeArray<LocalTransform> FighterLocalTransform;
+    [ReadOnly, DeallocateOnJobCompletion] public NativeArray<LocalToWorld> FighterWorldTransform;
+    [ReadOnly, DeallocateOnJobCompletion] public NativeArray<LocalTransform> FighterLocalTransform;
     [ReadOnly] public ComponentLookup<LocalToWorld> ParentLocalToWorldLookup;
 
     void Execute(ref LocalTransform transform, ref Canon canon, in LocalToWorld localToWorld, in Parent parent)
@@ -163,14 +162,12 @@ public partial struct OrientateTurrentsJob : IJobEntity
 
         canon.Target = bestTarget;
 
-        // Get parent rotation safely
         quaternion parentWorldRotation = quaternion.identity;
         if (ParentLocalToWorldLookup.HasComponent(parent.Value))
         {
             parentWorldRotation = ParentLocalToWorldLookup[parent.Value].Rotation;
         }
 
-        // Compute desired world rotation
         float3 direction = canon.Target - localToWorld.Position;
         if (math.lengthsq(direction) < 0.0001f)
         {
@@ -179,15 +176,11 @@ public partial struct OrientateTurrentsJob : IJobEntity
         }
         direction = math.normalize(direction);
         quaternion desiredWorldRotation = quaternion.LookRotationSafe(direction, math.up());
-
-        // Convert to local rotation
         quaternion desiredLocalRotation = math.mul(math.inverse(parentWorldRotation), desiredWorldRotation);
 
-        // Lerp local rotation
         float t = math.clamp(canon.RotationSpeed * deltaTime, 0f, 1f);
         transform.Rotation = math.slerp(transform.Rotation, desiredLocalRotation, t);
 
-        // Optional: aiming accuracy check
         float3 canonWorldForward = math.mul(parentWorldRotation, math.mul(transform.Rotation, new float3(0, 0, 1)));
         float angleDifference = math.degrees(math.acos(math.clamp(math.dot(canonWorldForward, direction), -1f, 1f)));
         canon.IsAimingAtTarget = angleDifference < 10f;
