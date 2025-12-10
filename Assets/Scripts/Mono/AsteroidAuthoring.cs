@@ -11,14 +11,8 @@ public class AsteroidAuthering : MonoBehaviour
         public override void Bake(AsteroidAuthering authoring)
         {
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
-
-            var sphere = authoring.GetComponent<SphereCollider>();
             
-            AddComponent(entity, new Asteroid()
-            {
-                UnscaledAsteroidRadius = sphere.radius
-            });
-
+            AddComponent(entity, new Asteroid());
             AddComponent(entity, new PhysicsCustomTags()
             {
                 Value = (int)(PhysicsTags.Avoid | PhysicsTags.Asteroid)
@@ -34,8 +28,5 @@ public class AsteroidAuthering : MonoBehaviour
 
 public struct Asteroid : IComponentData
 {
-    public float3 AngularVelocity;
-    public float3 LinearVelocity;
-    public float Scale;
-    public float UnscaledAsteroidRadius;
+    public float SphereRadius;
 }

@@ -8,7 +8,6 @@ using Unity.Jobs;
 [UpdateAfter(typeof(LaserMoveSystem))]
 [UpdateAfter(typeof(StarDestroyerMovementSystem))]
 [UpdateAfter(typeof(StarDestroyerExplosionSystem))]
-[UpdateAfter(typeof(AsteroidMovementSystem))]
 [UpdateAfter(typeof(SimpleExplosionSystem))]
 [UpdateAfter(typeof(LaserCollisionSystem))]
 

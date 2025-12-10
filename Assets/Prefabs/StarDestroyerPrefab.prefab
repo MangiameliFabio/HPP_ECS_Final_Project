@@ -1322,7 +1322,7 @@ MonoBehaviour:
     z: 10
   movementRadius: 300
   ID: 0
-  health: 100
+  health: 10000
 --- !u!114 &5916530240642883024
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -133,7 +133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: asteroidCount
-      value: 100
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: asteroidPrefab
@@ -141,7 +141,7 @@ PrefabInstance:
       objectReference: {fileID: 1968442513798736266, guid: 39a74ad92839ef442a10b0392af97757, type: 3}
     - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: starDestroyerCount
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1231363035816962576, guid: 934c5dc688b5d1f4b97760fec16745dd, type: 3}
       propertyPath: spawningBounds.MaxBounds.x

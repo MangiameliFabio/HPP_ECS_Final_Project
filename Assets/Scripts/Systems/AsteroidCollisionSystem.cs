@@ -42,7 +42,7 @@ public partial struct AsteroidCollisionSystem : ISystem
             hitBuffer.Clear();
 
             float3 center = localTransform.Position;
-            float radiusVal = asteroid.UnscaledAsteroidRadius * localTransform.Scale;
+            float radiusVal = asteroid.SphereRadius * localTransform.Scale;
 
             var pInput = new PointDistanceInput
             {

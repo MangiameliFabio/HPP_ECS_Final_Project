@@ -2,9 +2,12 @@ using System.Linq;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
+using Material = Unity.Physics.Material;
 using Random = Unity.Mathematics.Random;
+using SphereCollider = Unity.Physics.SphereCollider;
 
 public partial struct AsteroidSpawnSystem : ISystem
 {
@@ -31,22 +34,58 @@ public partial struct AsteroidSpawnSystem : ISystem
 
             var randomTransform =
                 TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation);
-            if (state.EntityManager.HasComponent<Asteroid>(asteroidEntity))
-            {
-                var asteroid = state.EntityManager.GetComponentData<Asteroid>(asteroidEntity);
 
-                asteroid.AngularVelocity = RandomFloat3(-0.5f, 0.5f);
-                asteroid.LinearVelocity = RandomFloat3(-1f, 1f);
-                asteroid.Scale = RandomFloat(0.15f, 0.5f);
-                    
-                randomTransform.Scale = asteroid.Scale;
-                
-                state.EntityManager.SetComponentData(asteroidEntity, asteroid);  
-            }
-            
-            if (state.EntityManager.HasComponent<LocalTransform>(asteroidEntity))
+            randomTransform.Scale = RandomFloat(0.15f, 0.5f);
+            state.EntityManager.SetComponentData(asteroidEntity, randomTransform);
+
+            var sphereGeometry = new SphereGeometry
             {
-                state.EntityManager.SetComponentData(asteroidEntity, randomTransform);    
+                Center = float3.zero,
+                Radius = 45
+            };
+            var material = new Material
+            {
+                Friction = 0f,
+                Restitution = 0.5f
+            };
+            var asteroidFilter = new CollisionFilter
+            {
+                BelongsTo =  16 << 0,
+                CollidesWith =  16 << 0,
+                GroupIndex = 0
+            };
+            var sphere = SphereCollider.Create(
+                sphereGeometry,
+                asteroidFilter,
+                material
+            );
+
+            state.EntityManager.SetComponentData(asteroidEntity, new PhysicsCollider
+            {
+                Value = sphere
+            });
+            
+            var asteroidComponentData = state.EntityManager.GetComponentData<Asteroid>(asteroidEntity);
+            asteroidComponentData.SphereRadius = sphereGeometry.Radius;
+            state.EntityManager.SetComponentData(asteroidEntity, asteroidComponentData);
+            
+            if (state.EntityManager.HasComponent<PhysicsVelocity>(asteroidEntity))
+            {
+                float3 linear = RandomFloat3(-1f, 1f);
+                float3 angular = RandomFloat3(-0.5f, 0.5f);
+
+                state.EntityManager.SetComponentData(asteroidEntity, new PhysicsVelocity
+                {
+                    Linear = linear,
+                    Angular = angular
+                });
+
+                if (state.EntityManager.HasComponent<PhysicsMass>(asteroidEntity))
+                {
+                    var mass = state.EntityManager.GetComponentData<PhysicsMass>(asteroidEntity);
+                    mass.InverseMass = 1000f / (1f + randomTransform.Scale);
+                    state.EntityManager.SetComponentData(asteroidEntity, mass);
+                }
             }
         }
     }

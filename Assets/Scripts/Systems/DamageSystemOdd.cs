@@ -7,7 +7,6 @@ using Unity.Entities;
 [UpdateAfter(typeof(LaserMoveSystem))]
 [UpdateAfter(typeof(StarDestroyerMovementSystem))]
 [UpdateAfter(typeof(StarDestroyerExplosionSystem))]
-[UpdateAfter(typeof(AsteroidMovementSystem))]
 [UpdateAfter(typeof(LaserCollisionSystem))]
 
 public partial struct DamageSystemOdd : ISystem
