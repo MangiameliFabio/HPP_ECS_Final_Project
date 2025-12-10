@@ -28,19 +28,18 @@ public class FighterAuthoring : MonoBehaviour
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
             AddComponent(entity, new Fighter
             {
-                MinSpeed = authoring.minFighterSpeed,
-                MaxSpeed = authoring.maxFighterSpeed,
-                MinRotationSpeed = authoring.minFighterRotationSpeed,
-                MaxRotationSpeed = authoring.maxFighterRotationSpeed,
-                NeighbourDetectionRadius = authoring.fighterNeighbourDetectionRadius,
-                AlignmentFactor = authoring.alignmentFactor,
-                CrowdingFactor = authoring.crowdingFactor,
-                NeighbourCounterForceFactor = authoring.neighbourCounterFactor,
-                AvoidanceFactor = authoring.avoidanceFactor,
-                TargetTrendFactor = authoring.targetTrendFactor,
-                TargetMinDistance = authoring.targetMinDistance,
+                // MaxSpeed = authoring.maxFighterSpeed,
+                // MinRotationSpeed = authoring.minFighterRotationSpeed,
+                // MaxRotationSpeed = authoring.maxFighterRotationSpeed,
+                // NeighbourDetectionRadius = authoring.fighterNeighbourDetectionRadius,
+                // AlignmentFactor = authoring.alignmentFactor,
+                // CrowdingFactor = authoring.crowdingFactor,
+                // NeighbourCounterForceFactor = authoring.neighbourCounterFactor,
+                // AvoidanceFactor = authoring.avoidanceFactor,
+                // TargetTrendFactor = authoring.targetTrendFactor,
+                // TargetMinDistance = authoring.targetMinDistance,
                 CurrentTargetPosition = float3.zero,
-                FireCooldown = authoring.fireCooldown
+                // FireCooldown = authoring.fireCooldown
             });
             AddComponent(entity, new PhysicsCustomTags()
             {
@@ -66,17 +65,17 @@ public enum FighterState : byte
 
 public struct Fighter : IComponentData
 {
-    public float MinSpeed;
-    public float MaxSpeed;
-    public float MinRotationSpeed;
-    public float MaxRotationSpeed;
-    public float NeighbourDetectionRadius;
-    public float AlignmentFactor;
-    public float CrowdingFactor;
-    public float NeighbourCounterForceFactor;
-    public float TargetTrendFactor;
-    public float AvoidanceFactor;
-    public float TargetMinDistance;
+    // public float MinSpeed;
+    // public float MaxSpeed;
+    // public float MinRotationSpeed;
+    // public float MaxRotationSpeed;
+    // public float NeighbourDetectionRadius;
+    // public float AlignmentFactor;
+    // public float CrowdingFactor;
+    // public float NeighbourCounterForceFactor;
+    // public float TargetTrendFactor;
+    // public float AvoidanceFactor;
+    // public float TargetMinDistance;
     
     public float3 AlignmentDirection;
     public float3 CrowdCenter;
@@ -86,7 +85,7 @@ public struct Fighter : IComponentData
     public float3 CurrentTargetPosition;
     public FighterState CurrentState;
     public Entity TargetEntity;
-    public double FireCooldown;
+    // public double FireCooldown;
     public double LastShotTime;
 
     public bool IsShooting;

@@ -5,6 +5,7 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
 using JetBrains.Annotations;
+using Unity.Collections;
 using UnityEditor.Compilation;
 
 public partial struct StarDestroyerMovementSystem : ISystem
@@ -12,19 +13,24 @@ public partial struct StarDestroyerMovementSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
-
+        state.RequireForUpdate<Config>();
+        state.RequireForUpdate<StarDestroyerSettings>();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        var startDestroyerSettings = SystemAPI.GetSingleton<StarDestroyerSettings>();
+        
         var job = new MoveTowardsTargetPoint
         {
+            DestroyerSettings = startDestroyerSettings,
             deltaTime = SystemAPI.Time.DeltaTime,
             globalTime = (float)SystemAPI.Time.ElapsedTime // does the cast cause it to always be the same? like 9999999...1234 and 9999999...1235 become 9999999 (x2) or 1234 and 1235?
         };
 
-        var handle = job.ScheduleParallel(state.Dependency);
+        var config = SystemAPI.GetSingleton<Config>();
+        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
         state.Dependency = handle;
     }
 
@@ -39,6 +45,7 @@ public partial struct StarDestroyerMovementSystem : ISystem
 [BurstCompile]
 public partial struct MoveTowardsTargetPoint : IJobEntity
 {
+    [ReadOnly] public StarDestroyerSettings DestroyerSettings;
     public float deltaTime;
     public float globalTime;
 
@@ -47,7 +54,7 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
     {
         if (starDestroyer.HasJumpedInScene)
         {
-            PatrolPoints(ref transform, ref starDestroyer);
+            PatrolPoints(ref transform, ref starDestroyer, ref DestroyerSettings);
         }
         else
         {
@@ -57,7 +64,7 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
 
             if (distance > 0.01f) // Threshold to stop lerping  
             {
-                float3 step = math.normalize(direction) * 5000 * starDestroyer.Speed;
+                float3 step = math.normalize(direction) * 5000 * DestroyerSettings.Speed;
                 transform.Position += math.length(step) < distance ? step : direction;
 
                 //// Scale the transform based on distance  
@@ -72,9 +79,9 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
         }
     }
 
-    void PatrolPoints(ref LocalTransform transform, ref StarDestroyer starDestroyer)
+    void PatrolPoints(ref LocalTransform transform, ref StarDestroyer starDestroyer, ref StarDestroyerSettings settings)
     {
-        float process = starDestroyer.MovementProcess + starDestroyer.Speed * deltaTime;
+        float process = starDestroyer.MovementProcess + settings.Speed * deltaTime;
         starDestroyer.MovementProcess = process;
         int id = starDestroyer.ID;
 
@@ -95,7 +102,7 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
                 2 * (0.5f - PseudoRandom(id, 1, globalTime))
             );
             newPoint = math.normalize(newPoint);
-            float scaleFactor = PseudoRandom(id, 2, globalTime) * starDestroyer.MovementRadius;
+            float scaleFactor = PseudoRandom(id, 2, globalTime) * settings.MovementRadius;
             float3 randomNewPoint = newPoint * scaleFactor;
             randomNewPoint.y = 0;
 

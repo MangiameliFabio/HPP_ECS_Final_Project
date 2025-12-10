@@ -11,16 +11,20 @@ public partial struct FighterFindTargetSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<Config>();
         state.RequireForUpdate<Fighter>();
         state.RequireForUpdate<TargetEntity>();
+        state.RequireForUpdate<FighterSettings>();
     }
     
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        var fighterSettings = SystemAPI.GetSingleton<FighterSettings>();
         var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
         var targetQuery = SystemAPI.QueryBuilder().WithAll<TargetEntity>().Build();
-
+        var config = SystemAPI.GetSingleton<Config>();
+        
         if (targetQuery.IsEmptyIgnoreFilter)
             return;
 
@@ -33,11 +37,12 @@ public partial struct FighterFindTargetSystem : ISystem
 
         var job = new FindTargetJob
         {
+            Settings = fighterSettings,
             LocalTransformLookup = localTransformLookup,
             Targets = targets
         };
 
-        JobHandle handle = job.ScheduleParallel(state.Dependency);
+        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
         targets.Dispose(handle);
         state.Dependency = handle;
     }
@@ -48,6 +53,7 @@ public partial struct FighterFindTargetSystem : ISystem
     [BurstCompile]
     public partial struct FindTargetJob : IJobEntity
     {
+        [ReadOnly] public FighterSettings Settings;
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
         [ReadOnly] public NativeArray<Entity> Targets;
 
@@ -101,7 +107,7 @@ public partial struct FighterFindTargetSystem : ISystem
             }
 
             float distSqToCurrentTarget = math.lengthsq(myPos - fighter.CurrentTargetPosition);
-            float minDistSq = fighter.TargetMinDistance * fighter.TargetMinDistance;
+            float minDistSq = Settings.TargetMinDistance * Settings.TargetMinDistance;
 
             if (distSqToCurrentTarget < minDistSq)
             {

@@ -10,12 +10,14 @@ public partial struct FighterAvoidanceSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<Config>();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
+        var config = SystemAPI.GetSingleton<Config>();
 
         localTransformLookup.Update(ref state);
 
@@ -24,7 +26,7 @@ public partial struct FighterAvoidanceSystem : ISystem
             LocalTransformLookup = localTransformLookup,
         };
 
-        var handle = job.ScheduleParallel(state.Dependency);
+        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
         state.Dependency = handle;
     }
 

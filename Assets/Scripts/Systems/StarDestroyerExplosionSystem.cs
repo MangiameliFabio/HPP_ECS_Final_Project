@@ -32,7 +32,7 @@ public partial struct StarDestroyerExplosionSystem : ISystem
         foreach (var (health, localToWorld, starDestroyer, transform) in SystemAPI.Query<RefRO<HealthComponent>, RefRO<LocalTransform>, RefRO<StarDestroyer>, RefRW<LocalTransform>>())
         {
             var currentHealth = health.ValueRO.Health;
-            var totalHealth = starDestroyer.ValueRO.Health;
+            var totalHealth = health.ValueRO.TotalHealth;
             
             var currentPosition = localToWorld.ValueRO.Position;
 

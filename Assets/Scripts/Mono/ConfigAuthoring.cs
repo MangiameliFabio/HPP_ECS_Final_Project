@@ -31,6 +31,8 @@ public class ConfigAuthoring : MonoBehaviour
     [Header("Spawning Bounds")]
     public SpawningBounds spawningBounds;
 
+    public bool runParallel = true;
+
     class Baker : Baker<ConfigAuthoring>
     {
         public override void Bake(ConfigAuthoring authoring)
@@ -51,6 +53,7 @@ public class ConfigAuthoring : MonoBehaviour
                 AsteroidCount = authoring.asteroidCount,
                 MaxSpawningBounds = authoring.spawningBounds.MaxBounds,
                 MinSpawningBounds = authoring.spawningBounds.MinBounds,
+                RunParallel = authoring.runParallel
             });
         }
     }
@@ -71,6 +74,7 @@ public struct Config : IComponentData
     public int AsteroidCount;
     public float3 MaxSpawningBounds;
     public float3 MinSpawningBounds;
+    public bool RunParallel;
 }
 
 [System.Flags]
@@ -85,6 +89,7 @@ public enum PhysicsTags
 public struct HealthComponent : IComponentData
 {
     public float Health;
+    public float TotalHealth;
 }
 
 public struct TimedDestructionComponent : IComponentData

@@ -10,6 +10,7 @@ public partial struct AsteroidCollisionSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<Config>();
         state.RequireForUpdate<PhysicsWorldSingleton>();
     }
 
@@ -24,7 +25,8 @@ public partial struct AsteroidCollisionSystem : ISystem
             CurrentPhysicsWorld = physicsWorld
         };
         
-        var handle = job.ScheduleParallel(state.Dependency);
+        var config = SystemAPI.GetSingleton<Config>();
+        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
         state.Dependency = handle;
     }
 

@@ -9,6 +9,8 @@ public partial struct FighterSwarmSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<Config>();
+        state.RequireForUpdate<FighterSettings>();
     }
 
     [BurstCompile]
@@ -17,12 +19,17 @@ public partial struct FighterSwarmSystem : ISystem
         var localTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true);
         localTransformLookup.Update(ref state);
         
+        var fighterSettings = SystemAPI.GetSingleton<FighterSettings>();
+        
         var swarmJob = new FighterSwarmJob()
         {
+            Settings = fighterSettings,
             LocalTransformLookup = localTransformLookup,
         };
-        var swarmHandle = swarmJob.ScheduleParallel(state.Dependency);
-        state.Dependency = swarmHandle;
+        
+        var config = SystemAPI.GetSingleton<Config>();
+        var handle = config.RunParallel ? swarmJob.ScheduleParallel(state.Dependency) : swarmJob.Schedule(state.Dependency);
+        state.Dependency = handle;
     }
 
     [BurstCompile]
@@ -34,6 +41,7 @@ public partial struct FighterSwarmSystem : ISystem
     [BurstCompile]
     partial struct FighterSwarmJob : IJobEntity
     {
+        [ReadOnly] public FighterSettings Settings;
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
         void Execute(in DynamicBuffer<NearbyFighter> buffer, in LocalTransform localTransform, ref Fighter fighter, in Entity entity)
         {
@@ -62,7 +70,7 @@ public partial struct FighterSwarmSystem : ISystem
                 var direction = entityLocalTransform.Position - neigbourLocalTransform.Position;
                 var distance = math.lengthsq(direction);
                 
-                float radiusSq = fighter.NeighbourDetectionRadius * fighter.NeighbourDetectionRadius;
+                float radiusSq = Settings.NeighbourDetectionRadius * Settings.NeighbourDetectionRadius;
                 float distanceFactor = math.lerp(0, 1, math.clamp(math.unlerp(radiusSq, 0f, distance), 0, 1));
                 
                 if (distance > 0f)

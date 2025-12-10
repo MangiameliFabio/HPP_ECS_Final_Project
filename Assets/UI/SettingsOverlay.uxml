@@ -1,0 +1,45 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/SettingsOverlay.uss?fileID=7433441132597879392&amp;guid=efd2089d60f6cbe4897c198d9b6472d9&amp;type=3#SettingsOverlay" />
+    <ui:VisualElement name="Canvas" style="flex-grow: 1; flex-direction: row;">
+        <ui:VisualElement name="SettingsContainer" style="flex-grow: 1;">
+            <ui:VisualElement name="Settings" style="flex-grow: 1; right: auto; display: flex; position: relative; width: 337px; background-color: rgba(0, 0, 0, 0.31); opacity: 1;">
+                <ui:Label text="Genral Settings" name="General" style="color: rgb(255, 255, 255);" />
+                <ui:Toggle label="Run in parallel" name="RunParallel" />
+                <ui:Label text="Fighter Settings" name="Fighter" style="color: rgb(255, 255, 255);" />
+                <ui:TextField label="Spawn Amount" name="fighterSpawnCount" value="1000" keyboard-type="NumbersAndPunctuation" style="height: 20px; width: 292px;" />
+                <ui:Slider label="MinSpeed" value="10" high-value="100" usage-hints="None" fill="true" show-input-field="true" name="MinSpeed" low-value="0" />
+                <ui:Slider label="MaxSpeed" value="2" high-value="100" usage-hints="None" fill="true" show-input-field="true" name="MaxSpeed" low-value="0" />
+                <ui:Slider label="MinRotationSpeed" value="0.5" high-value="5" usage-hints="None" fill="true" show-input-field="true" name="MinRotationSpeed" low-value="0" />
+                <ui:Slider label="MaxRotationSpeed" value="2" high-value="5" usage-hints="None" fill="true" show-input-field="true" name="MaxRotationSpeed" low-value="0" />
+                <ui:Slider label="DetectionRadius" value="10" high-value="20" usage-hints="None" fill="true" show-input-field="true" name="NeighbourDetectionRadius" />
+                <ui:Slider label="AlignmentFactor" value="1" high-value="3" usage-hints="None" fill="true" show-input-field="true" name="AlignmentFactor" />
+                <ui:Slider label="CrowdingFactor" value="0.8" high-value="3" usage-hints="None" fill="true" show-input-field="true" name="CrowdingFactor" />
+                <ui:Slider label="NeighbourCounterForceFactor" value="1" high-value="3" usage-hints="None" fill="true" show-input-field="true" name="NeighbourCounterForceFactor" />
+                <ui:Slider label="AvoidanceFactor" value="50" high-value="200" usage-hints="None" fill="true" show-input-field="true" name="AvoidanceFactor" style="height: 25px;" />
+                <ui:Slider label="TargetTrendFactor" value="1.5" high-value="3" usage-hints="None" fill="true" show-input-field="true" name="TargetTrendFactor" />
+                <ui:Slider label="TargetMinDistance" value="50" high-value="500" usage-hints="None" fill="true" show-input-field="true" name="TargetMinDistance" />
+                <ui:Slider label="FireCooldown" value="5" high-value="30" usage-hints="None" fill="true" show-input-field="true" name="FireCooldown" />
+                <ui:Label text="Star Destroyer Settings" name="StarDestroyer" style="color: rgb(255, 255, 255);" />
+                <ui:TextField label="Spawn Amount" name="SDSpawnCount" value="2" keyboard-type="NumbersAndPunctuation" style="height: 20px; width: 292px; align-self: flex-start;" />
+                <ui:TextField label="Health" name="SDHealth" value="10000" keyboard-type="NumbersAndPunctuation" style="height: 20px; width: 292px; align-self: flex-start;" />
+                <ui:Slider label="Speed" value="1" high-value="20" usage-hints="None" fill="true" show-input-field="true" name="SDSpeed" />
+                <ui:Slider label="MovementRadius" value="20" high-value="200" usage-hints="None" fill="true" show-input-field="true" name="SDMovementRadius" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ToggleMessage" style="flex-grow: 0; right: auto; display: flex; position: relative; width: 337px; background-color: rgba(0, 0, 0, 0.31); opacity: 1; align-content: flex-end; flex-direction: column; height: auto; align-items: flex-start; flex-shrink: 1; flex-wrap: nowrap; top: auto; left: auto; margin-top: auto;">
+                <ui:Label text="Press WASD to nove camera" name="WASD" style="color: rgb(255, 255, 255); display: flex;" />
+                <ui:Label text="Press LMB to speed up camera" name="LMB" style="color: rgb(255, 255, 255); display: flex;" />
+                <ui:Label text="Press F11 to toggle settings" name="PressF11" style="color: rgb(255, 255, 255); display: flex;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="KillCount" style="flex-grow: 0; right: auto; display: flex; position: relative; width: auto; background-color: rgba(0, 0, 0, 0.31); opacity: 1; align-content: flex-end; flex-direction: column; height: auto; align-items: flex-start; flex-shrink: 0; flex-wrap: nowrap; top: auto; left: auto; margin-top: 0; margin-right: 0; margin-bottom: auto; margin-left: 0;">
+            <ui:VisualElement name="Fighter" style="flex-grow: 1; flex-direction: row;">
+                <ui:Label text="Killed Fighter: " name="FighterKillCount" style="color: rgb(255, 255, 255); display: flex; min-width: 150px;" />
+                <ui:Label text="0" name="AmountFighter" style="color: rgb(255, 255, 255); display: flex; min-width: 50px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="StarDestroyer" style="flex-grow: 1; flex-direction: row;">
+                <ui:Label text="killed Star Destroyer:" name="SDKillCount" style="color: rgb(255, 255, 255); display: flex; min-width: 150px;" />
+                <ui:Label text="0" name="AmountStarDestroyer" style="color: rgb(255, 255, 255); display: flex; min-width: 50px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

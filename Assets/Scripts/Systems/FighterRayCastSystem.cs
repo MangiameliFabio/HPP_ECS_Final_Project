@@ -12,7 +12,9 @@ public partial struct FighterRayCastSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<Config>();
         state.RequireForUpdate<PhysicsWorldSingleton>();
+        state.RequireForUpdate<FighterSettings>();
     }
 
     [BurstCompile]
@@ -23,17 +25,22 @@ public partial struct FighterRayCastSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        var fighterSettings = SystemAPI.GetSingleton<FighterSettings>();
+            
         var physicsWorldSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
         ref PhysicsWorld physicsWorld = ref physicsWorldSingleton.PhysicsWorld;
         double elapsed = SystemAPI.Time.ElapsedTime;
 
         var job = new RayCastFighterJob
         {
+            Settings = fighterSettings,
             CurrentPhysicsWorld = physicsWorld,
             ElapsedTime = elapsed,
         };
         
-        state.Dependency = job.ScheduleParallel(state.Dependency);
+        var config = SystemAPI.GetSingleton<Config>();
+        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
+        state.Dependency = handle;
         state.Dependency.Complete();
         
         var hitBufferLookup = SystemAPI.GetBufferLookup<HitBufferElement>();
@@ -43,6 +50,7 @@ public partial struct FighterRayCastSystem : ISystem
     [BurstCompile]
     partial struct RayCastFighterJob : IJobEntity
     {
+        [ReadOnly] public FighterSettings Settings;
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
         public double ElapsedTime;
 
@@ -50,7 +58,7 @@ public partial struct FighterRayCastSystem : ISystem
         {
             fighter.IsShooting = false;
 
-            if (fighter.LastShotTime + fighter.FireCooldown > ElapsedTime)
+            if (fighter.LastShotTime + Settings.FireCooldown > ElapsedTime)
                 return;
 
             float3 dir = math.normalize(localTransform.Forward());

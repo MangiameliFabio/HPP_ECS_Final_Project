@@ -10,7 +10,9 @@ public partial struct NearbySearchSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<Config>();
         state.RequireForUpdate<PhysicsWorldSingleton>();
+        state.RequireForUpdate<FighterSettings>();
     }
 
     [BurstCompile]
@@ -18,19 +20,24 @@ public partial struct NearbySearchSystem : ISystem
     {
         var physicsSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
         ref var physicsWorld = ref physicsSingleton.PhysicsWorld;
+        
+        var fighterSettings = SystemAPI.GetSingleton<FighterSettings>();
 
         var job = new NearbySearchJob()
         {
+            Settings = fighterSettings,
             CurrentPhysicsWorld = physicsWorld
         };
         
-        var handle = job.ScheduleParallel(state.Dependency);
+        var config = SystemAPI.GetSingleton<Config>();
+        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
         state.Dependency = handle;
     }
 
     [BurstCompile]
     partial struct NearbySearchJob : IJobEntity
     {
+        [ReadOnly] public FighterSettings Settings;
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
 
         void Execute(ref LocalTransform localTransform,
@@ -43,7 +50,7 @@ public partial struct NearbySearchSystem : ISystem
             avoidanceBuffer.Clear();
 
             float3 center = localTransform.Position;
-            float radiusVal = fighter.NeighbourDetectionRadius;
+            float radiusVal = Settings.NeighbourDetectionRadius;
 
             var pInput = new PointDistanceInput
             {

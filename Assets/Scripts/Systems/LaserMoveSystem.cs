@@ -10,6 +10,7 @@ public partial struct LaserMoveSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<Config>();
     }
 
     [BurstCompile]
@@ -20,7 +21,8 @@ public partial struct LaserMoveSystem : ISystem
             deltaTime = SystemAPI.Time.DeltaTime,
         };
 
-        var handle = job.ScheduleParallel(state.Dependency);
+        var config = SystemAPI.GetSingleton<Config>();
+        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
         state.Dependency = handle;
     }
 

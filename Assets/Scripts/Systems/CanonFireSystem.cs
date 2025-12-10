@@ -11,6 +11,7 @@ public partial struct CanonFireSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
         state.RequireForUpdate<Config>();
         state.RequireForUpdate<Canon>();
     }
@@ -36,14 +37,13 @@ public partial struct CanonFireSystem : ISystem
             ParentLocalToWorldLookup = parentLocalToWorldLookup
         };
 
-        var jobHandle = orientJob.ScheduleParallel(state.Dependency);
+        var config = SystemAPI.GetSingleton<Config>();
+        var jobHandle = config.RunParallel ? orientJob.ScheduleParallel(state.Dependency) : orientJob.Schedule(state.Dependency);
 
         jobHandle.Complete();
 
         fighterLocalToWorld.Dispose();
         fighterLocalTransform.Dispose();
-
-        var config = SystemAPI.GetSingleton<Config>();
 
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);

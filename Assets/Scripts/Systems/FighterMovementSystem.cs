@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
@@ -9,17 +10,23 @@ public partial struct FighterMovementSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<Config>();
+        state.RequireForUpdate<FighterSettings>();
     }
 
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
+        var fighterSettings = SystemAPI.GetSingleton<FighterSettings>();
+        
         var job = new MoveForwardJob
         {
+            Settings = fighterSettings,
             deltaTime = SystemAPI.Time.DeltaTime
         };
         
-        var handle = job.ScheduleParallel(state.Dependency);
+        var config = SystemAPI.GetSingleton<Config>();
+        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
         state.Dependency = handle;
     }
 
@@ -33,6 +40,7 @@ public partial struct FighterMovementSystem : ISystem
 [BurstCompile]
 public partial struct MoveForwardJob : IJobEntity
 {
+    [ReadOnly] public FighterSettings Settings;
     public float deltaTime;
 
     void Execute(ref LocalTransform transform, ref Fighter fighter)
@@ -48,11 +56,11 @@ public partial struct MoveForwardJob : IJobEntity
         fighter.TargetDirection =  math.normalizesafe(fighter.CurrentTargetPosition - transform.Position, float3.zero);
 
         float3 newDirection =
-            alignmentDirection * fighter.AlignmentFactor +
-            avoidanceDirection * fighter.AvoidanceFactor +
-            neighbourForceDirection * fighter.NeighbourCounterForceFactor +
-            fighter.TargetDirection * fighter.TargetTrendFactor +
-            toCenterDir * fighter.CrowdingFactor;
+            alignmentDirection * Settings.AlignmentFactor +
+            avoidanceDirection * Settings.AvoidanceFactor +
+            neighbourForceDirection * Settings.NeighbourCounterForceFactor +
+            fighter.TargetDirection * Settings.TargetTrendFactor +
+            toCenterDir * Settings.CrowdingFactor;
         
         quaternion targetRot = transform.Rotation;
         if (!newDirection.Equals(float3.zero))
@@ -62,11 +70,11 @@ public partial struct MoveForwardJob : IJobEntity
         
         float normalizedAngle = math.saturate(angle / math.PI);
         
-        float dynamicRotationSpeed = math.lerp(fighter.MinRotationSpeed, fighter.MaxRotationSpeed, normalizedAngle); 
+        float dynamicRotationSpeed = math.lerp(Settings.MinRotationSpeed, Settings.MaxRotationSpeed, normalizedAngle); 
         quaternion newRot = math.slerp(transform.Rotation, targetRot, dynamicRotationSpeed * deltaTime);
         transform.Rotation = math.normalize(newRot);
 
-        float dynamicSpeed = math.lerp(fighter.MinSpeed, fighter.MaxSpeed, math.clamp(200 / math.length(newDirection), 0 , 1));
+        float dynamicSpeed = math.lerp(Settings.MinSpeed, Settings.MaxSpeed, math.clamp(200 / math.length(newDirection), 0 , 1));
         transform.Position += transform.Forward() * dynamicSpeed * deltaTime;
         
         fighter.AlignmentDirection = float3.zero;

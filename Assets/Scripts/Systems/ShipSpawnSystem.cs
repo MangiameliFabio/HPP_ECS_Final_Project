@@ -1,9 +1,7 @@
-using System.Linq;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 public partial struct ShipSpawnSystem : ISystem
 {
@@ -13,6 +11,7 @@ public partial struct ShipSpawnSystem : ISystem
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<StarDestroyerSettings>();
         state.RequireForUpdate<Config>();
 
         _starDestroyerQuery = state.GetEntityQuery(ComponentType.ReadOnly<StarDestroyer>());
@@ -26,6 +25,7 @@ public partial struct ShipSpawnSystem : ISystem
 
         int currentDestroyerCount = _starDestroyerQuery.CalculateEntityCount();
         var deltaShipCount = config.StarDestroyerCount - currentDestroyerCount;
+        var destroyerSettings = SystemAPI.GetSingleton<StarDestroyerSettings>();
         
         for (int i = 0; i < deltaShipCount; i++)
         {
@@ -69,6 +69,15 @@ public partial struct ShipSpawnSystem : ISystem
                 starDestroyer.HasJumpedInScene = false;
 
                 state.EntityManager.SetComponentData(destroyerEntity, starDestroyer);
+            }
+            
+            if (state.EntityManager.HasComponent<HealthComponent>(destroyerEntity))
+            {
+                state.EntityManager.SetComponentData(destroyerEntity, new HealthComponent
+                {
+                    Health = destroyerSettings.Health,
+                    TotalHealth = destroyerSettings.Health
+                });
             }
         }
 

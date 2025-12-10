@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1554221733027463530
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2723434351246544662}
+  - component: {fileID: 7750527662395636690}
+  m_Layer: 0
+  m_Name: FighterSettings
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2723434351246544662
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554221733027463530}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2061.6348, y: -3839.3052, z: 6388.0195}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7750527662395636690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554221733027463530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a1c2bdd2d8449e3bd198d958faac829, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FighterSettingsAuthoring
+  minFighterSpeed: 10
+  maxFighterSpeed: 20
+  minFighterRotationSpeed: 0.5
+  maxFighterRotationSpeed: 2
+  fighterNeighbourDetectionRadius: 10
+  alignmentFactor: 1
+  crowdingFactor: 0.8
+  neighbourCounterFactor: 1
+  avoidanceFactor: 50
+  targetTrendFactor: 1.5
+  targetMinDistance: 50
+  fireCooldown: 5

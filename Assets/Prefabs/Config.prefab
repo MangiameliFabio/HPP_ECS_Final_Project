@@ -52,7 +52,7 @@ MonoBehaviour:
   cruiserExplosionPrefab: {fileID: 7531846442927558533, guid: ebef0792523de2d43998fdc01d969b62, type: 3}
   fighterExplosionPrefab: {fileID: 7531846442927558533, guid: e8d43709a158e734d91e789e6e5b3a7e, type: 3}
   beamVFXPrefab: {fileID: 8662281771762358241, guid: 657157b364e0b294396c50e5fa7197d3, type: 3}
-  fighterCount: 1000
+  fighterCount: 100
   starDestroyerCount: 0
   asteroidCount: 0
   spawningBounds:

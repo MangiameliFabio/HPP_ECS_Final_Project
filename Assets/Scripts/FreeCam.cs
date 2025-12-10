@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
+using Cursor = UnityEngine.Cursor;
 
 [RequireComponent(typeof(Camera))]
 public class FreeCam : MonoBehaviour
@@ -18,8 +21,16 @@ public class FreeCam : MonoBehaviour
     private float rotationX;
     private float rotationY;
 
+    public bool BlockMovement = false;
+    
+    private VisualElement _ui;
+    private Keyboard _keyboard;
+
     void Start()
     {
+        _ui = GetComponent<UIDocument>().rootVisualElement;
+        _keyboard = Keyboard.current;
+        
         if (lockCursor)
         {
             Cursor.lockState = CursorLockMode.Locked;
@@ -29,8 +40,17 @@ public class FreeCam : MonoBehaviour
 
     void Update()
     {
-        HandleMouseLook();
-        HandleMovement();
+        if (BlockMovement)
+            return;
+        
+        if (_keyboard != null && _keyboard.f11Key.wasPressedThisFrame)
+        {
+            BlockMovement = !BlockMovement;
+            _ui.visible = !_ui.visible;
+        }
+        
+        // HandleMouseLook();
+        // HandleMovement();
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -70,6 +90,6 @@ public class FreeCam : MonoBehaviour
         if (Input.GetKey(downKey))
             moveDir.y -= 1f;
 
-        transform.position += moveDir * speed * Time.deltaTime;
+        transform.position += moveDir * (speed * Time.deltaTime);
     }
 }

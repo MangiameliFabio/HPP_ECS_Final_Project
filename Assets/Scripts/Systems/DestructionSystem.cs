@@ -39,6 +39,16 @@ public partial struct DestructionSystem : ISystem
             {
                 var linked = state.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
                 var entities = linked.Reinterpret<Entity>().AsNativeArray();
+
+                if (state.EntityManager.HasComponent<Fighter>(entity))
+                {
+                    KillCount.FightersKilled += 1;
+                }
+                
+                if (state.EntityManager.HasComponent<StarDestroyer>(entity))
+                {
+                    KillCount.StarDestroyerKilled += 1;
+                }
                 
                 ecb.DestroyEntity(entities);
             }
