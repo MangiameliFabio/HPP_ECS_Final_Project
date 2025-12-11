@@ -29,7 +29,7 @@ public partial struct AsteroidSpawnSystem : ISystem
         var material = new Material { Friction = 0f, Restitution = 0.5f };
         var filter = new CollisionFilter { BelongsTo = 16 << 0, CollidesWith = 16 << 0 };
     
-     asteroidCollider = SphereCollider.Create(sphereGeometry, filter, material);
+        asteroidCollider = SphereCollider.Create(sphereGeometry, filter, material);
     }
     
     [BurstCompile]
@@ -102,3 +102,4 @@ public partial struct AsteroidSpawnSystem : ISystem
         return random.NextFloat(min, max);
     }
 }
+

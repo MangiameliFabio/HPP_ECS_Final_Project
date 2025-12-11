@@ -25,7 +25,7 @@ public class SettingsController : MonoBehaviour
     private TextField _fighterSpawnCount;
     private TextField _starDestroyerSpawnCount;
     private TextField _starDestroyerHealth;
-    private Toggle _toggleRunParallel;
+    private DropdownField _dropDownRunningType;
     private Keyboard _keyboard;
     private VisualElement _settingsContainer;
     private Label _fighterKilledLabel;
@@ -87,8 +87,8 @@ public class SettingsController : MonoBehaviour
         _starDestroyerHealth = _ui.Q<TextField>("SDHealth");
         _starDestroyerHealth.RegisterValueChangedCallback(OnDestroyerHealth);
         
-        _toggleRunParallel = _ui.Q<Toggle>("RunParallel");
-        _toggleRunParallel.RegisterValueChangedCallback(OnRunParallelChanged);
+        _dropDownRunningType = _ui.Q<DropdownField>("RunningType");
+        _dropDownRunningType.RegisterValueChangedCallback(OnRunParallelChanged);
         
         StartCoroutine(WaitForECSWorld());
     }
@@ -134,7 +134,7 @@ public class SettingsController : MonoBehaviour
         
         var cfg = _em.GetComponentData<Config>(_configEntity);
         _fighterSpawnCount.value = cfg.FighterCount.ToString();
-        _toggleRunParallel.value = cfg.RunParallel;
+        _dropDownRunningType.index = (int)cfg.RunType;
     }
     
     private void OnDisable()
@@ -181,15 +181,28 @@ public class SettingsController : MonoBehaviour
         _em.SetComponentData(_starDestroyerSettingsEntity, settings);
     }
     
-    private void OnRunParallelChanged(ChangeEvent<bool> evt)
+    private void OnRunParallelChanged(ChangeEvent<string> evt)
     {
         if (_configEntity == Entity.Null)
             return;
 
-        var enable = evt.newValue;
-
+        var runType = evt.newValue;
         var cfg = _em.GetComponentData<Config>(_configEntity);
-        cfg.RunParallel = enable;
+
+        switch (runType)
+        {
+            case "Main Thread":
+                cfg.RunType = RunningType.MainThread;
+                break;
+            case "Scheduled":
+                cfg.RunType = RunningType.Scheduled;
+                break;
+            case "Scheduled Parallel":
+                cfg.RunType = RunningType.Parallel;
+                break;
+            default:
+                break;
+        }
         _em.SetComponentData(_configEntity, cfg);
     }
     

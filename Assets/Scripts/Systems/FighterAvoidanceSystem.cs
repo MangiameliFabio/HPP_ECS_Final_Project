@@ -26,8 +26,20 @@ public partial struct FighterAvoidanceSystem : ISystem
             LocalTransformLookup = localTransformLookup,
         };
 
-        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
-        state.Dependency = handle;
+        switch (config.RunType)
+        {
+            case RunningType.MainThread:
+                job.Run();
+                break;
+            case RunningType.Scheduled:
+                state.Dependency = job.Schedule(state.Dependency);
+                break;
+            case RunningType.Parallel:
+                state.Dependency = job.ScheduleParallel(state.Dependency);
+                break;
+            default:
+                break;
+        }
     }
 
     [BurstCompile]

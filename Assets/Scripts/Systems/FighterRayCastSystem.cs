@@ -39,12 +39,21 @@ public partial struct FighterRayCastSystem : ISystem
         };
         
         var config = SystemAPI.GetSingleton<Config>();
-        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
-        state.Dependency = handle;
-        state.Dependency.Complete();
-        
-        var hitBufferLookup = SystemAPI.GetBufferLookup<HitBufferElement>();
-        hitBufferLookup.Update(ref state);
+        switch (config.RunType)
+        {
+            case RunningType.MainThread:
+                state.Dependency.Complete();
+                job.Run();
+                break;
+            case RunningType.Scheduled:
+                state.Dependency = job.Schedule(state.Dependency);
+                break;
+            case RunningType.Parallel:
+                state.Dependency = job.ScheduleParallel(state.Dependency);
+                break;
+            default:
+                break;
+        }
     }
 
     [BurstCompile]

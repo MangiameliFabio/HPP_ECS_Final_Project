@@ -38,11 +38,25 @@ public partial struct CanonFireSystem : ISystem
         };
 
         var config = SystemAPI.GetSingleton<Config>();
-        var jobHandle = config.RunParallel ? orientJob.ScheduleParallel(state.Dependency) : orientJob.Schedule(state.Dependency);
-
-        state.Dependency = jobHandle;
-
-        jobHandle.Complete();
+        JobHandle jobHandle;
+        switch (config.RunType)
+        {
+            case RunningType.MainThread:
+                orientJob.Run();
+                break;
+            case RunningType.Scheduled:
+                jobHandle = orientJob.Schedule(state.Dependency);
+                state.Dependency = jobHandle;
+                jobHandle.Complete();
+                break;
+            case RunningType.Parallel:
+                jobHandle = orientJob.ScheduleParallel(state.Dependency);
+                state.Dependency = jobHandle;
+                jobHandle.Complete();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
 
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
@@ -98,7 +112,7 @@ public partial struct CanonFireSystem : ISystem
 
                 ecb.AddComponent(laserEntity, new TimedDestructionComponent
                 {
-                    lifeTime = 0.5f,
+                    lifeTime = 2.5f,
                     elapsedTime = 0f
                 });
                 ecb.AddComponent(laserEntity, new HealthComponent

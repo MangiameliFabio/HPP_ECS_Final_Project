@@ -41,10 +41,26 @@ public partial struct FighterFindTargetSystem : ISystem
             LocalTransformLookup = localTransformLookup,
             Targets = targets
         };
+        
+        switch (config.RunType)
+        {
+            case RunningType.MainThread:
+                job.Run();
+                targets.Dispose();
+                break;
 
-        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
-        targets.Dispose(handle);
-        state.Dependency = handle;
+            case RunningType.Scheduled:
+                var h1 = job.Schedule(state.Dependency);
+                targets.Dispose(h1);
+                state.Dependency = h1;
+                break;
+
+            case RunningType.Parallel:
+                var h2 = job.ScheduleParallel(state.Dependency);
+                targets.Dispose(h2);
+                state.Dependency = h2;
+                break;
+        }
     }
     
     [BurstCompile]

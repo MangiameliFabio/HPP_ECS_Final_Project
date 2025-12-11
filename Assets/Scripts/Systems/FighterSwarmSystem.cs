@@ -21,15 +21,27 @@ public partial struct FighterSwarmSystem : ISystem
         
         var fighterSettings = SystemAPI.GetSingleton<FighterSettings>();
         
-        var swarmJob = new FighterSwarmJob()
+        var job = new FighterSwarmJob()
         {
             Settings = fighterSettings,
             LocalTransformLookup = localTransformLookup,
         };
         
         var config = SystemAPI.GetSingleton<Config>();
-        var handle = config.RunParallel ? swarmJob.ScheduleParallel(state.Dependency) : swarmJob.Schedule(state.Dependency);
-        state.Dependency = handle;
+        switch (config.RunType)
+        {
+            case RunningType.MainThread:
+                job.Run();
+                break;
+            case RunningType.Scheduled:
+                state.Dependency = job.Schedule(state.Dependency);
+                break;
+            case RunningType.Parallel:
+                state.Dependency = job.ScheduleParallel(state.Dependency);
+                break;
+            default:
+                break;
+        }
     }
 
     [BurstCompile]

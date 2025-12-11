@@ -9,6 +9,13 @@ public struct SpawningBounds
     public float3 MinBounds;
 }
 
+public enum RunningType
+{
+    MainThread,
+    Scheduled,
+    Parallel
+}
+
 public class ConfigAuthoring : MonoBehaviour
 {
     [Header("Prefabs")]
@@ -31,7 +38,7 @@ public class ConfigAuthoring : MonoBehaviour
     [Header("Spawning Bounds")]
     public SpawningBounds spawningBounds;
 
-    public bool runParallel = true;
+    public RunningType runType = RunningType.Parallel;
 
     class Baker : Baker<ConfigAuthoring>
     {
@@ -53,7 +60,7 @@ public class ConfigAuthoring : MonoBehaviour
                 AsteroidCount = authoring.asteroidCount,
                 MaxSpawningBounds = authoring.spawningBounds.MaxBounds,
                 MinSpawningBounds = authoring.spawningBounds.MinBounds,
-                RunParallel = authoring.runParallel
+                RunType = authoring.runType
             });
         }
     }
@@ -74,7 +81,7 @@ public struct Config : IComponentData
     public int AsteroidCount;
     public float3 MaxSpawningBounds;
     public float3 MinSpawningBounds;
-    public bool RunParallel;
+    public RunningType RunType;
 }
 
 [System.Flags]

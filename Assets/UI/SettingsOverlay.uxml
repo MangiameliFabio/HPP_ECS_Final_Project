@@ -4,7 +4,7 @@
         <ui:VisualElement name="SettingsContainer" style="flex-grow: 1;">
             <ui:VisualElement name="Settings" style="flex-grow: 1; right: auto; display: flex; position: relative; width: 337px; background-color: rgba(0, 0, 0, 0.31); opacity: 1;">
                 <ui:Label text="Genral Settings" name="General" style="color: rgb(255, 255, 255);" />
-                <ui:Toggle label="Run in parallel" name="RunParallel" />
+                <ui:DropdownField label="Running Type" choices="Main Thread,Scheduled,Scheduled Parallel" tabindex="0" index="0" name="RunningType" />
                 <ui:Label text="Fighter Settings" name="Fighter" style="color: rgb(255, 255, 255);" />
                 <ui:TextField label="Spawn Amount" name="fighterSpawnCount" value="1000" keyboard-type="NumbersAndPunctuation" style="height: 20px; width: 292px;" />
                 <ui:Slider label="MinSpeed" value="10" high-value="100" usage-hints="None" fill="true" show-input-field="true" name="MinSpeed" low-value="0" />

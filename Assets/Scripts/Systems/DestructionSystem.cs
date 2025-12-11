@@ -51,6 +51,7 @@ public partial struct DestructionSystem : ISystem
                 }
                 
                 ecb.DestroyEntity(entities);
+                entities.Dispose();
             }
         }
 

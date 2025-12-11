@@ -1,12 +1,9 @@
-using System;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 using UnityEngine;
-using JetBrains.Annotations;
 using Unity.Collections;
-using UnityEditor.Compilation;
 
 public partial struct StarDestroyerMovementSystem : ISystem
 {
@@ -30,8 +27,20 @@ public partial struct StarDestroyerMovementSystem : ISystem
         };
 
         var config = SystemAPI.GetSingleton<Config>();
-        var handle = config.RunParallel ? job.ScheduleParallel(state.Dependency) : job.Schedule(state.Dependency);
-        state.Dependency = handle;
+        switch (config.RunType)
+        {
+            case RunningType.MainThread:
+                job.Run();
+                break;
+            case RunningType.Scheduled:
+                state.Dependency = job.Schedule(state.Dependency);
+                break;
+            case RunningType.Parallel:
+                state.Dependency = job.ScheduleParallel(state.Dependency);
+                break;
+            default:
+                break;
+        }
     }
 
     [BurstCompile]

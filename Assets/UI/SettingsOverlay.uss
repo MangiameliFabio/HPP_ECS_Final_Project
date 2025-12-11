@@ -74,7 +74,7 @@ TextField Label {
     font-size: 12px;
 }
 
-Toggle Label {
+DropdownField Label {
     margin-top: 0;
     margin-right: 0;
     margin-bottom: 0;
@@ -86,7 +86,25 @@ Toggle Label {
     font-size: 12px;
 }
 
-#unity-checkmark {
-    width: 12px;
-    height: 12px;
+DropdownField VisualElement {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+DropdownField PopupTextElement {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    font-size: 12px;
 }
