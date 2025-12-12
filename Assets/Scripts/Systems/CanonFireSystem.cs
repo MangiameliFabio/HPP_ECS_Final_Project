@@ -5,6 +5,7 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
 
 public partial struct CanonFireSystem : ISystem
 {
@@ -29,11 +30,19 @@ public partial struct CanonFireSystem : ISystem
         var parentLocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
         parentLocalToWorldLookup.Update(ref state);
 
+        var fighterLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
+        fighterLookup.Update(ref state);
+
+        var fighterCount = fighterQuery.CalculateEntityCount();
+        var fighterEntities = fighterQuery.ToEntityArray(Allocator.TempJob);
+
         var orientJob = new OrientateTurrentsJob
         {
             deltaTime = SystemAPI.Time.DeltaTime,
-            FighterWorldTransform = fighterLocalToWorld,
-            FighterLocalTransform = fighterLocalTransform,
+            globalTime = (float)SystemAPI.Time.ElapsedTime,
+            FighterEntities = fighterEntities,
+            FighterLookup = fighterLookup,
+            FighterCount = fighterCount,
             ParentLocalToWorldLookup = parentLocalToWorldLookup
         };
 
@@ -140,31 +149,53 @@ public partial struct CanonFireSystem : ISystem
 public partial struct OrientateTurrentsJob : IJobEntity
 {
     public float deltaTime;
+    public float globalTime;
 
-    [ReadOnly, DeallocateOnJobCompletion] public NativeArray<LocalToWorld> FighterWorldTransform;
-    [ReadOnly, DeallocateOnJobCompletion] public NativeArray<LocalTransform> FighterLocalTransform;
-    [ReadOnly] public ComponentLookup<LocalToWorld> ParentLocalToWorldLookup;
+    [ReadOnly, DeallocateOnJobCompletion]
+    public NativeArray<Entity> FighterEntities;
+
+    [ReadOnly]
+    public ComponentLookup<LocalToWorld> FighterLookup;
+
+    public int FighterCount;
+
+    [ReadOnly]
+    public ComponentLookup<LocalToWorld> ParentLocalToWorldLookup;
 
     void Execute(ref LocalTransform transform, ref Canon canon, in LocalToWorld localToWorld, in Parent parent)
     {
-        float minDistSq = float.MaxValue;
-        float3 bestTarget = float3.zero;
-        bool foundTarget = false;
-
-        for (int i = 0; i < FighterWorldTransform.Length; i++)
+        if (FighterCount == 0)
         {
-            var fighterWorld = FighterWorldTransform[i];
-            float distSq = math.distancesq(localToWorld.Position, fighterWorld.Position);
-            if (distSq < minDistSq)
+            canon.Target = float3.zero;
+            canon.IsAimingAtTarget = false;
+            return;
+        }
+
+        int canonID = (int)(transform.Position.x + transform.Position.y + transform.Position.z);
+        bool foundTarget = false;
+        // try three times to find a fighter, else just dont fire
+        // also introduces randomness, so the stardestroyers do not shoot all at once
+        for (int i = 0; i < 3; i++)
+        {
+            int index = PseudoRandom(canonID, i, globalTime, FighterCount);
+            var fighter = FighterEntities[index];
+
+            if (!FighterLookup.HasComponent(fighter))
             {
-                if ((canon.IsTop && fighterWorld.Position.y >= localToWorld.Position.y) ||
-                    (!canon.IsTop && fighterWorld.Position.y <= localToWorld.Position.y))
-                {
-                    minDistSq = distSq;
-                    bestTarget = fighterWorld.Position;
-                    foundTarget = true;
-                }
+                continue;
             }
+
+            float3 fighterPos = FighterLookup[fighter].Position;
+
+            if ((canon.IsTop && fighterPos.y < localToWorld.Position.y) ||
+                (!canon.IsTop && fighterPos.y > localToWorld.Position.y))
+            {
+                continue;
+            }
+
+            canon.Target = fighterPos;
+            foundTarget = true;
+            break;
         }
 
         if (!foundTarget)
@@ -173,8 +204,6 @@ public partial struct OrientateTurrentsJob : IJobEntity
             canon.IsAimingAtTarget = false;
             return;
         }
-
-        canon.Target = bestTarget;
 
         quaternion parentWorldRotation = quaternion.identity;
         if (ParentLocalToWorldLookup.HasComponent(parent.Value))
@@ -198,5 +227,9 @@ public partial struct OrientateTurrentsJob : IJobEntity
         float3 canonWorldForward = math.mul(parentWorldRotation, math.mul(transform.Rotation, new float3(0, 0, 1)));
         float angleDifference = math.degrees(math.acos(math.clamp(math.dot(canonWorldForward, direction), -1f, 1f)));
         canon.IsAimingAtTarget = angleDifference < 10f;
+    }
+    int PseudoRandom(int canonID, int callID, float globalTime, int range)
+    {
+        return (int)((math.frac(Mathf.Sin((canonID + callID) * 12.9898f + (canonID* globalTime) * 78.233f) * 43758.5453f))*range);
     }
 }
