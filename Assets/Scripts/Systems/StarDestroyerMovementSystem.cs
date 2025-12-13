@@ -67,8 +67,10 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
         }
         else
         {
-            // Lerp to first point  
-            float3 direction = starDestroyer.Point1 - transform.Position;
+            // Lerp to first point
+            float3 pointOnYPlane = starDestroyer.Point1;
+            pointOnYPlane.y = transform.Position.y;
+            float3 direction = pointOnYPlane - transform.Position;
             float distance = math.length(direction);
 
             if (distance > 0.01f) // Threshold to stop lerping  
@@ -152,7 +154,19 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
 
     float PseudoRandom(int starDestrpyerID, int callID, float globalTime)
     {
-        return math.frac(Mathf.Sin((starDestrpyerID + callID) * 12.9898f + (starDestrpyerID * globalTime) * 78.233f) * 43758.5453f);
+        uint h = (uint)starDestrpyerID;
+        h ^= 0x9E3779B9u * (uint)callID;
+        h ^= math.asuint(globalTime);
+
+        // final avalanche
+        h ^= h >> 16;
+        h *= 0x7feb352du;
+        h ^= h >> 15;
+        h *= 0x846ca68bu;
+        h ^= h >> 16;
+
+        return h * (1.0f / uint.MaxValue);
     }
+
 }
 

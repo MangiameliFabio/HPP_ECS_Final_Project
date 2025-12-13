@@ -4,8 +4,8 @@ using UnityEngine;
 public class StarDestroyerSettingsAuthoring : MonoBehaviour
 {
     public float speed = 1f;
-    public float movementRadius = 20f;
-    public float health = 10000f;
+    public float movementRadius = 200f;
+    public float health = 1000f;
     class Baker : Baker<StarDestroyerSettingsAuthoring>
     {
         public override void Bake(StarDestroyerSettingsAuthoring authoring)
