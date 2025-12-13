@@ -24,9 +24,6 @@ public partial struct CanonFireSystem : ISystem
             .WithAll<Fighter, LocalTransform, LocalToWorld>()
             .Build();
 
-        var fighterLocalToWorld = fighterQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
-        var fighterLocalTransform = fighterQuery.ToComponentDataArray<LocalTransform>(Allocator.TempJob);
-
         var parentLocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
         parentLocalToWorldLookup.Update(ref state);
 
