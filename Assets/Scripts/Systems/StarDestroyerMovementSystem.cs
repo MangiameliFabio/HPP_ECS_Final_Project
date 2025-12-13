@@ -133,17 +133,14 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
             2 * process * (starDestroyer.Point3 - starDestroyer.Point2)
         );
 
-        // keep y position
         float transformY = transform.Position.y;
         bezierPosition.y = transformY;
 
-        // Adjust rotation to face movement direction
         if (math.lengthsq(tangent) > 0)
         {
             quaternion targetRotation = quaternion.LookRotationSafe(math.normalize(tangent), math.up());
             transform.Rotation = math.slerp(transform.Rotation, targetRotation, 0.1f);
 
-            // Ensure the shortest rotation path is taken to avoid flipping
             if (math.dot(transform.Rotation.value, targetRotation.value) < 0)
             {
                 targetRotation.value = -targetRotation.value;
