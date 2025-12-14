@@ -15,7 +15,6 @@ public class StarDestroyerAuthoring : MonoBehaviour
     {
         public override void Bake(StarDestroyerAuthoring authoring)
         {
-            // GetEntity returns the Entity baked from the GameObject
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
             AddComponent(entity, new StarDestroyer
             {
@@ -27,7 +26,6 @@ public class StarDestroyerAuthoring : MonoBehaviour
             });
             AddComponent(entity, new PhysicsCustomTags()
             {
-                //Set physics custom tag to "Avoid" and "StarDestroyer"
                 Value = (int)PhysicsTags.Avoid | (int)PhysicsTags.StarDestroyer
             });
             AddComponent(entity, new TargetEntity());

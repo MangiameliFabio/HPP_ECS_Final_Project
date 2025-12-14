@@ -33,7 +33,7 @@ public partial struct CanonFireSystem : ISystem
         var fighterCount = fighterQuery.CalculateEntityCount();
         var fighterEntities = fighterQuery.ToEntityArray(Allocator.TempJob);
 
-        var orientJob = new OrientateTurrentsJob
+        var orientJob = new OrientateCanonsJob
         {
             deltaTime = SystemAPI.Time.DeltaTime,
             globalTime = (float)SystemAPI.Time.ElapsedTime,
@@ -143,7 +143,7 @@ public partial struct CanonFireSystem : ISystem
 }
 
 [BurstCompile]
-public partial struct OrientateTurrentsJob : IJobEntity
+public partial struct OrientateCanonsJob : IJobEntity
 {
     public float deltaTime;
     public float globalTime;
@@ -172,7 +172,7 @@ public partial struct OrientateTurrentsJob : IJobEntity
         bool foundTarget = false;
         // try three times to find a fighter, else just dont fire
         // also introduces randomness, so the stardestroyers do not shoot all at once
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 10; i++)
         {
             int index = PseudoRandom(canonID, i, globalTime, FighterCount);
             var fighter = FighterEntities[index];

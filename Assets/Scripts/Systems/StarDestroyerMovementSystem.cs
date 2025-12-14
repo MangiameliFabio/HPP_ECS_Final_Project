@@ -158,7 +158,6 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
         h ^= 0x9E3779B9u * (uint)callID;
         h ^= math.asuint(globalTime);
 
-        // final avalanche
         h ^= h >> 16;
         h *= 0x7feb352du;
         h ^= h >> 15;

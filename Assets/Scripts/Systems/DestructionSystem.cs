@@ -17,6 +17,7 @@ public partial struct DestructionSystem : ISystem
         var healthLookup = SystemAPI.GetComponentLookup<HealthComponent>();
         healthLookup.Update(ref state);
         
+        // right now this will never really run, as the hitbuffer was already cleared in the DamageSystem, which updates before this one
         foreach (var hitBuffer in 
                  SystemAPI.Query<DynamicBuffer<HitBufferElement>>())
         {
