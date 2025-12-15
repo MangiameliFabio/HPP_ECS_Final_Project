@@ -7,7 +7,9 @@ public partial struct ShipSpawnSystem : ISystem
 {
     private EntityQuery _starDestroyerQuery;
     private EntityQuery _fighterQuery;
-    
+    private bool _isInitialSpawn;
+    private int _oldFighterConfigCount;
+
     [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
@@ -16,8 +18,10 @@ public partial struct ShipSpawnSystem : ISystem
 
         _starDestroyerQuery = state.GetEntityQuery(ComponentType.ReadOnly<StarDestroyer>());
         _fighterQuery = state.GetEntityQuery(ComponentType.ReadOnly<Fighter>());
-    }
     
+        _isInitialSpawn = true;
+    }
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -26,8 +30,6 @@ public partial struct ShipSpawnSystem : ISystem
         int currentDestroyerCount = _starDestroyerQuery.CalculateEntityCount();
         var deltaShipCount = config.StarDestroyerCount - currentDestroyerCount;
         var destroyerSettings = SystemAPI.GetSingleton<StarDestroyerSettings>();
-        
-        // batch instantiate
 
         for (int i = 0; i < deltaShipCount; i++)
         {
@@ -84,7 +86,23 @@ public partial struct ShipSpawnSystem : ISystem
         }
 
         int currentFighterCount = _fighterQuery.CalculateEntityCount();
+
+        var maxAmountOfShipsPerFrame = 24;
+
+        if (config.FighterCount > _oldFighterConfigCount)
+        {
+            _oldFighterConfigCount = config.FighterCount;
+            _isInitialSpawn = true;
+        }
+
+        if (_isInitialSpawn)
+        {
+            maxAmountOfShipsPerFrame = int.MaxValue;
+            _isInitialSpawn = false;
+        }
+
         deltaShipCount = config.FighterCount - currentFighterCount;
+        deltaShipCount = math.min(deltaShipCount, maxAmountOfShipsPerFrame);
 
         for (int i = 0; i < deltaShipCount; i++)
         {

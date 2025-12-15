@@ -54,6 +54,7 @@ public partial struct DestructionSystem : ISystem
 
                     KillCount.StarDestroyerKilled += 1;
 
+                    ecb.DestroyEntity(entities);
                     entities.Dispose();
                 }
                 else
