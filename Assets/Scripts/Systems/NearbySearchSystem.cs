@@ -52,11 +52,11 @@ public partial struct NearbySearchSystem : ISystem
         [ReadOnly] public FighterSettings Settings;
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
 
-        void Execute(ref LocalTransform localTransform,
-                            ref Fighter fighter,
-                            ref DynamicBuffer<NearbyFighter> swarmBuffer,
-                            ref DynamicBuffer<AvoidingEntityBufferElement> avoidanceBuffer,
-                            in Entity entity)
+        void Execute(in LocalTransform localTransform,
+                    in Fighter fighter,
+                    ref DynamicBuffer<NearbyFighter> swarmBuffer,
+                    ref DynamicBuffer<AvoidingEntityBufferElement> avoidanceBuffer,
+                    in Entity entity)
         {
             swarmBuffer.Clear();
             avoidanceBuffer.Clear();

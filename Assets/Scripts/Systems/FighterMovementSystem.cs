@@ -55,8 +55,12 @@ public partial struct MoveForwardJob : IJobEntity
     [ReadOnly] public FighterSettings Settings;
     public float deltaTime;
 
-    void Execute(ref LocalTransform transform, ref Fighter fighter)
+    void Execute(ref LocalTransform transform, ref Fighter fighter, ref HealthComponent healthComponent)
     {
+        
+        if (healthComponent.Health <= 0)
+            return;
+
         float3 alignmentDirection = math.normalizesafe(fighter.AlignmentDirection, float3.zero);
         float3 avoidanceDirection = math.normalizesafe(fighter.AvoidanceDirection, float3.zero);
         float3 neighbourForceDirection = math.normalizesafe(fighter.NeighbourCounterForceDirection, float3.zero);

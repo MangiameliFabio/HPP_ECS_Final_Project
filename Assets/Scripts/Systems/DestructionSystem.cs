@@ -38,21 +38,32 @@ public partial struct DestructionSystem : ISystem
         {
             if (health.ValueRO.Health <= 0)
             {
-                var linked = state.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
-                var entities = linked.Reinterpret<Entity>().AsNativeArray();
-
-                if (state.EntityManager.HasComponent<Fighter>(entity))
-                {
-                    KillCount.FightersKilled += 1;
-                }
-                
+                // only look at linked entities if it is a star destroyer
                 if (state.EntityManager.HasComponent<StarDestroyer>(entity))
                 {
+                    var linked = state.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
+                    var entities = linked.Reinterpret<Entity>().AsNativeArray();
+                    for (int i = 0; i < entities.Length; i++)
+                    {
+                        var linkedEntity = entities[i];
+                        if (state.EntityManager.HasComponent<Fighter>(linkedEntity))
+                        {
+                            KillCount.FightersKilled += 1;
+                        }
+                    }
+
                     KillCount.StarDestroyerKilled += 1;
+
+                    entities.Dispose();
                 }
-                
-                ecb.DestroyEntity(entities);
-                entities.Dispose();
+                else
+                {
+                    if (state.EntityManager.HasComponent<Fighter>(entity))
+                    {
+                        KillCount.FightersKilled += 1;
+                    }
+                    ecb.DestroyEntity(entity);
+                }
             }
         }
 

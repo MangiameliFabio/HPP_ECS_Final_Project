@@ -27,6 +27,8 @@ public partial struct ShipSpawnSystem : ISystem
         var deltaShipCount = config.StarDestroyerCount - currentDestroyerCount;
         var destroyerSettings = SystemAPI.GetSingleton<StarDestroyerSettings>();
         
+        // batch instantiate
+
         for (int i = 0; i < deltaShipCount; i++)
         {
             var destroyerEntity = state.EntityManager.Instantiate(config.StarDestroyerPrefab);
@@ -91,9 +93,14 @@ public partial struct ShipSpawnSystem : ISystem
             var randomTransform =
                 TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation);
             
+            var fighter = state.EntityManager.GetComponentData<Fighter>(fighterEntity);
+            fighter.StartPosition = randomTransform.Position;
+
+            state.EntityManager.SetComponentData(fighterEntity, fighter);
+
             if (state.EntityManager.HasComponent<LocalTransform>(fighterEntity))
             {
-                state.EntityManager.SetComponentData(fighterEntity, randomTransform);    
+                state.EntityManager.SetComponentData(fighterEntity, randomTransform);
             }
         }
     }

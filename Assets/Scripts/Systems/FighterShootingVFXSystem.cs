@@ -1,10 +1,10 @@
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
-using UnityEngine;
+using Unity.Mathematics;
 
 [UpdateAfter(typeof(FighterRayCastSystem))]
-
 public partial struct FighterShootingVFXSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
@@ -12,46 +12,70 @@ public partial struct FighterShootingVFXSystem : ISystem
         state.RequireForUpdate<Config>();
     }
 
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         var config = SystemAPI.GetSingleton<Config>();
 
         var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
-        var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
+        var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
-        foreach (var (fighter, transform) in
-                 SystemAPI.Query<RefRO<Fighter>, RefRO<LocalToWorld>>())
+        var job = new FighterShootingVFXJob
         {
-            if (!fighter.ValueRO.IsShooting)
-                continue;
+            BeamVFXPrefab = config.BeamVFX,
+            ECB = ecb
+        };
 
-            var beamVFX = ecb.Instantiate(config.BeamVFX);
+        switch (config.RunType)
+        {
+            case RunningType.MainThread:
+                job.Run();
+                break;
+            case RunningType.Scheduled:
+                state.Dependency = job.Schedule(state.Dependency);
+                break;
+            case RunningType.Parallel:
+                state.Dependency = job.ScheduleParallel(state.Dependency);
+                break;
+            default:
+                throw new System.ArgumentOutOfRangeException();
+        }
+    }
 
-            // Set/override LocalTransform for instantiated entities
-            // (Assuming prefab already has LocalTransform, use SetComponent; otherwise use AddComponent)
-            ecb.SetComponent(beamVFX, new LocalTransform
+    [BurstCompile]
+    partial struct FighterShootingVFXJob : IJobEntity
+    {
+        public Entity BeamVFXPrefab;
+        public EntityCommandBuffer.ParallelWriter ECB;
+
+        void Execute([ChunkIndexInQuery] int sortKey,
+                     in Fighter fighter,
+                     in LocalToWorld transform)
+        {
+            if (!fighter.IsShooting)
+                return;
+
+            Entity beamVFX = ECB.Instantiate(sortKey, BeamVFXPrefab);
+
+            ECB.SetComponent(sortKey, beamVFX, new LocalTransform
             {
-                Position = transform.ValueRO.Position,
-                Rotation = transform.ValueRO.Rotation,
+                Position = transform.Position,
+                Rotation = transform.Rotation,
                 Scale = 1f
             });
-            // Add the VFX tag/component if prefab does not include it
-            ecb.AddComponent(beamVFX, new BeamComponent());
 
-            // Add components that are likely not part of prefab archetype
-            ecb.AddComponent(beamVFX, new TimedDestructionComponent
+            ECB.AddComponent<BeamComponent>(sortKey, beamVFX);
+            ECB.AddComponent(sortKey, beamVFX, new TimedDestructionComponent
             {
                 lifeTime = 0.5f,
                 elapsedTime = 0f
             });
-            ecb.AddComponent(beamVFX, new HealthComponent
+            ECB.AddComponent(sortKey, beamVFX, new HealthComponent
             {
                 Health = 1f
             });
         }
     }
 
-    public void OnDestroy(ref SystemState state)
-    {
-    }
+    public void OnDestroy(ref SystemState state) { }
 }

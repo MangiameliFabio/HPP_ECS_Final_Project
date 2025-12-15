@@ -67,6 +67,7 @@ public struct Fighter : IComponentData
     public bool IsShooting;
     public float3 BeamStart;
     public float3 BeamEnd;
+    public float3 StartPosition;
 }
 
 public struct NearbyFighter : IBufferElementData

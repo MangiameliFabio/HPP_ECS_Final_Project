@@ -54,7 +54,7 @@ MonoBehaviour:
   beamVFXPrefab: {fileID: 8662281771762358241, guid: 657157b364e0b294396c50e5fa7197d3, type: 3}
   fighterCount: 100
   starDestroyerCount: 0
-  asteroidCount: 0
+  asteroidCount: 500
   spawningBounds:
     MaxBounds:
       x: 0
@@ -64,3 +64,4 @@ MonoBehaviour:
       x: 0
       y: 0
       z: 0
+  runType: 2
