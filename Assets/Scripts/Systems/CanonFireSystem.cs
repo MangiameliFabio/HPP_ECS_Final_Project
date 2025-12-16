@@ -50,6 +50,7 @@ public partial struct CanonFireSystem : ISystem
         switch (config.RunType)
         {
             case RunningType.MainThread:
+                state.Dependency.Complete();
                 orientJob.Run();
                 break;
             case RunningType.Scheduled:
