@@ -11,7 +11,7 @@
                 <ui:Slider label="MaxSpeed" value="2" high-value="100" usage-hints="None" fill="true" show-input-field="true" name="MaxSpeed" low-value="0" />
                 <ui:Slider label="MinRotationSpeed" value="0.5" high-value="5" usage-hints="None" fill="true" show-input-field="true" name="MinRotationSpeed" low-value="0" />
                 <ui:Slider label="MaxRotationSpeed" value="2" high-value="5" usage-hints="None" fill="true" show-input-field="true" name="MaxRotationSpeed" low-value="0" />
-                <ui:Slider label="DetectionRadius" value="10" high-value="20" usage-hints="None" fill="true" show-input-field="true" name="NeighbourDetectionRadius" />
+                <ui:Slider label="DetectionRadius" value="10" high-value="200" usage-hints="None" fill="true" show-input-field="true" name="NeighbourDetectionRadius" />
                 <ui:Slider label="AlignmentFactor" value="1" high-value="3" usage-hints="None" fill="true" show-input-field="true" name="AlignmentFactor" />
                 <ui:Slider label="CrowdingFactor" value="0.8" high-value="3" usage-hints="None" fill="true" show-input-field="true" name="CrowdingFactor" />
                 <ui:Slider label="NeighbourCounterForceFactor" value="1" high-value="3" usage-hints="None" fill="true" show-input-field="true" name="NeighbourCounterForceFactor" />
@@ -38,7 +38,7 @@
                 <ui:Label text="0" name="AmountFighter" style="color: rgb(255, 255, 255); display: flex; min-width: 50px;" />
             </ui:VisualElement>
             <ui:VisualElement name="StarDestroyer" style="flex-grow: 1; flex-direction: row;">
-                <ui:Label text="killed Star Destroyer:" name="SDKillCount" style="color: rgb(255, 255, 255); display: flex; min-width: 150px;" />
+                <ui:Label text="Killed Star Destroyer:" name="SDKillCount" style="color: rgb(255, 255, 255); display: flex; min-width: 150px;" />
                 <ui:Label text="0" name="AmountStarDestroyer" style="color: rgb(255, 255, 255); display: flex; min-width: 50px;" />
             </ui:VisualElement>
             <ui:Label name="Performance" />

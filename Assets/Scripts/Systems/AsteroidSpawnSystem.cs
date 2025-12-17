@@ -54,10 +54,10 @@ public partial struct AsteroidSpawnSystem : ISystem
                 Value = asteroidCollider,
             });
 
-            var asteroidComponentData = state.EntityManager.GetComponentData<Asteroid>(asteroidEntity);
+            var asteroidComponentData = state.EntityManager.GetComponentData<AsteroidComponent>(asteroidEntity);
             asteroidComponentData.SphereRadius = radius;
             state.EntityManager.SetComponentData(asteroidEntity, asteroidComponentData);
-            
+                
             if (state.EntityManager.HasComponent<PhysicsVelocity>(asteroidEntity))
             {
                 float3 linear = RandomFloat3(-1f, 1f);

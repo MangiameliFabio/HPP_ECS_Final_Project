@@ -51,7 +51,7 @@ public partial struct AsteroidCollisionSystem : ISystem
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
 
         void Execute(ref LocalTransform localTransform,
-                            ref Asteroid asteroid,
+                            ref AsteroidComponent asteroidComponent,
                             ref DynamicBuffer<HitBufferElement> hitBuffer,
                             ref HealthComponent health,
                             in Entity entity)
@@ -59,7 +59,7 @@ public partial struct AsteroidCollisionSystem : ISystem
             hitBuffer.Clear();
 
             float3 center = localTransform.Position;
-            float radiusVal = asteroid.SphereRadius * localTransform.Scale;
+            float radiusVal = asteroidComponent.SphereRadius * localTransform.Scale;
 
             var pInput = new PointDistanceInput
             {
@@ -96,10 +96,6 @@ public partial struct AsteroidCollisionSystem : ISystem
                         TargetEntity = hitEntity,
                         Damage = 1,
                     });
-                }
-                else if ((body.CustomTags & (uint)PhysicsTags.Asteroid) == 0)
-                {
-                    health.Health -= 1;
                 }
             }
 

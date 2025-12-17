@@ -325,6 +325,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7750527662395636690, guid: 49601a082dd7473419f552f0bdfc7baf, type: 3}
+      propertyPath: crowdingFactor
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7750527662395636690, guid: 49601a082dd7473419f552f0bdfc7baf, type: 3}
+      propertyPath: neighbourCounterFactor
+      value: 1.3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

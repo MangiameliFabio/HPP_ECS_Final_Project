@@ -39,7 +39,7 @@ public class FighterAuthoring : MonoBehaviour
             {
                 Health = authoring.fighterHealth
             });
-            AddBuffer<NearbyFighter>(entity);
+            AddBuffer<NearbyFighterElement>(entity);
             AddBuffer<AvoidingEntityBufferElement>(entity);
             AddBuffer<HitBufferElement>(entity);
         }
@@ -70,7 +70,7 @@ public struct FighterComponent : IComponentData
     public float3 StartPosition;
 }
 
-public struct NearbyFighter : IBufferElementData
+public struct NearbyFighterElement : IBufferElementData
 {
     public Entity entity;
 }

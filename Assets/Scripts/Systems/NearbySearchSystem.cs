@@ -54,7 +54,7 @@ public partial struct NearbySearchSystem : ISystem
 
         void Execute(in LocalTransform localTransform,
                     in FighterComponent fighterComponent,
-                    ref DynamicBuffer<NearbyFighter> swarmBuffer,
+                    ref DynamicBuffer<NearbyFighterElement> swarmBuffer,
                     ref DynamicBuffer<AvoidingEntityBufferElement> avoidanceBuffer,
                     in Entity entity)
         {
@@ -106,7 +106,7 @@ public partial struct NearbySearchSystem : ISystem
                 // Check if custom tag "Fighter" is set
                 if ((body.CustomTags & (uint)PhysicsTags.Fighter) != 0)
                 {
-                    swarmBuffer.Add(new NearbyFighter { entity = hitEntity });
+                    swarmBuffer.Add(new NearbyFighterElement { entity = hitEntity });
                 }
             }
 

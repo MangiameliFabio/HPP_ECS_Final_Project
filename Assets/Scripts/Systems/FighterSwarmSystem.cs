@@ -55,7 +55,7 @@ public partial struct FighterSwarmSystem : ISystem
     {
         [ReadOnly] public FighterSettings Settings;
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
-        void Execute(in DynamicBuffer<NearbyFighter> buffer, in LocalTransform localTransform, ref FighterComponent fighterComponent, in Entity entity)
+        void Execute(in DynamicBuffer<NearbyFighterElement> buffer, in LocalTransform localTransform, ref FighterComponent fighterComponent, in Entity entity)
         {
             float size = buffer.Length;
             
