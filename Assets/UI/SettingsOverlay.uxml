@@ -24,7 +24,7 @@
                 <ui:TextField label="Health" name="SDHealth" value="1000" keyboard-type="NumbersAndPunctuation" style="height: 20px; width: 292px; align-self: flex-start;" />
                 <ui:Slider label="Speed" value="1" high-value="20" usage-hints="None" fill="true" show-input-field="true" name="SDSpeed" />
                 <ui:Slider label="MovementRadius" value="200" high-value="200" usage-hints="None" fill="true" show-input-field="true" name="SDMovementRadius" />
-                <ui:Slider label="ProjectileRadius" value="10" high-value="30" usage-hints="None" fill="true" show-input-field="true" name="SDMovementRadius" />
+                <ui:Slider label="ProjectileRadius" value="10" high-value="30" usage-hints="None" fill="true" show-input-field="true" name="SDProjectileRadius" />
             </ui:VisualElement>
             <ui:VisualElement name="ToggleMessage" style="flex-grow: 0; right: auto; display: flex; position: relative; width: 337px; background-color: rgba(0, 0, 0, 0.31); opacity: 1; align-content: flex-end; flex-direction: column; height: auto; align-items: flex-start; flex-shrink: 1; flex-wrap: nowrap; top: auto; left: auto; margin-top: auto;">
                 <ui:Label text="Press WASD to nove camera" name="WASD" style="color: rgb(255, 255, 255); display: flex;" />
@@ -32,7 +32,7 @@
                 <ui:Label text="Press F11 to toggle settings" name="PressF11" style="color: rgb(255, 255, 255); display: flex;" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="KillCount" style="flex-grow: 0; right: auto; display: flex; position: relative; width: auto; background-color: rgba(0, 0, 0, 0.31); opacity: 1; align-content: flex-end; flex-direction: column; height: auto; align-items: flex-start; flex-shrink: 0; flex-wrap: nowrap; top: auto; left: auto; margin-top: 0; margin-right: 0; margin-bottom: auto; margin-left: 0;">
+        <ui:VisualElement name="Stats" style="flex-grow: 0; right: auto; display: flex; position: relative; width: auto; background-color: rgba(0, 0, 0, 0.31); opacity: 1; align-content: flex-end; flex-direction: column; height: auto; align-items: flex-start; flex-shrink: 0; flex-wrap: nowrap; top: auto; left: auto; margin-top: 0; margin-right: 0; margin-bottom: auto; margin-left: 0;">
             <ui:VisualElement name="Fighter" style="flex-grow: 1; flex-direction: row;">
                 <ui:Label text="Killed Fighter: " name="FighterKillCount" style="color: rgb(255, 255, 255); display: flex; min-width: 150px;" />
                 <ui:Label text="0" name="AmountFighter" style="color: rgb(255, 255, 255); display: flex; min-width: 50px;" />
@@ -41,6 +41,7 @@
                 <ui:Label text="killed Star Destroyer:" name="SDKillCount" style="color: rgb(255, 255, 255); display: flex; min-width: 150px;" />
                 <ui:Label text="0" name="AmountStarDestroyer" style="color: rgb(255, 255, 255); display: flex; min-width: 50px;" />
             </ui:VisualElement>
+            <ui:Label name="Performance" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

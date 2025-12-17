@@ -1,10 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.Cursor;
+using Slider = UnityEngine.UIElements.Slider;
 
 
 public struct KillCount
@@ -30,6 +32,11 @@ public class SettingsController : MonoBehaviour
     private VisualElement _settingsContainer;
     private Label _fighterKilledLabel;
     private Label _starDestroyerKilledLabel;
+    private Label _performanceText;
+    public int sampleSize = 300;
+
+    private Queue<float> frameTimes = new Queue<float>();
+    private float frameTimeSum = 0f;
     
     private readonly System.Collections.Generic.Dictionary<string, Slider> _sliders
         = new System.Collections.Generic.Dictionary<string, Slider>();
@@ -91,6 +98,8 @@ public class SettingsController : MonoBehaviour
         _dropDownRunningType = _ui.Q<DropdownField>("RunningType");
         _dropDownRunningType.RegisterValueChangedCallback(OnRunParallelChanged);
         
+        _performanceText = _ui.Q<Label>("Performance");
+        
         StartCoroutine(WaitForECSWorld());
     }
     
@@ -106,6 +115,28 @@ public class SettingsController : MonoBehaviour
         
         _fighterKilledLabel.text = KillCount.FightersKilled.ToString();
         _starDestroyerKilledLabel.text = KillCount.StarDestroyerKilled.ToString();
+        
+        float deltaTime = Time.unscaledDeltaTime;
+        float frameTimeMs = deltaTime * 1000f;
+        float fps = 1f / deltaTime;
+        
+        frameTimes.Enqueue(deltaTime);
+        frameTimeSum += deltaTime;
+
+        if (frameTimes.Count > sampleSize)
+        {
+            frameTimeSum -= frameTimes.Dequeue();
+        }
+
+        float avgDeltaTime = frameTimeSum / frameTimes.Count;
+        float avgFrameTimeMs = avgDeltaTime * 1000f;
+        float avgFps = 1f / avgDeltaTime;
+
+        _performanceText.text =
+            $"FPS: {fps:F1}\n" +
+            $"Avg FPS: {avgFps:F1}\n" +
+            $"Frame Time: {frameTimeMs:F2} ms\n" +
+            $"Avg Frame Time: {avgFrameTimeMs:F2} ms";
     }
     
     private IEnumerator WaitForECSWorld()
