@@ -7,7 +7,7 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Jobs;
 
-public partial struct FighterRayCastSystem : ISystem
+public partial struct FighterShootingSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -31,7 +31,7 @@ public partial struct FighterRayCastSystem : ISystem
         ref PhysicsWorld physicsWorld = ref physicsWorldSingleton.PhysicsWorld;
         double elapsed = SystemAPI.Time.ElapsedTime;
 
-        var job = new RayCastFighterJob
+        var job = new ShootingJob
         {
             Settings = fighterSettings,
             CurrentPhysicsWorld = physicsWorld,
@@ -57,17 +57,17 @@ public partial struct FighterRayCastSystem : ISystem
     }
 
     [BurstCompile]
-    partial struct RayCastFighterJob : IJobEntity
+    partial struct ShootingJob : IJobEntity
     {
         [ReadOnly] public FighterSettings Settings;
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
         public double ElapsedTime;
 
-        void Execute(ref LocalTransform localTransform, ref Fighter fighter, ref DynamicBuffer<HitBufferElement> hitBuffer, in Entity entity)
+        void Execute(ref LocalTransform localTransform, ref FighterComponent fighterComponent, ref DynamicBuffer<HitBufferElement> hitBuffer, in Entity entity)
         {
-            fighter.IsShooting = false;
+            fighterComponent.IsShooting = false;
 
-            if (fighter.LastShotTime + Settings.FireCooldown > ElapsedTime)
+            if (fighterComponent.LastShotTime + Settings.FireCooldown > ElapsedTime)
                 return;
 
             float3 dir = math.normalize(localTransform.Forward());
@@ -92,11 +92,11 @@ public partial struct FighterRayCastSystem : ISystem
                         Damage = 1
                     });
 
-                    fighter.IsShooting = true;
-                    fighter.BeamStart = start;
-                    fighter.BeamEnd = hit.Position;
+                    fighterComponent.IsShooting = true;
+                    fighterComponent.BeamStart = start;
+                    fighterComponent.BeamEnd = hit.Position;
 
-                    fighter.LastShotTime = ElapsedTime;
+                    fighterComponent.LastShotTime = ElapsedTime;
                 }
             }
         }

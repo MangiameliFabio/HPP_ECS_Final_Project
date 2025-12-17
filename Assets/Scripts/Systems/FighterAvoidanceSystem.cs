@@ -52,7 +52,7 @@ public partial struct FighterAvoidanceSystem : ISystem
     {
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
         
-        public void Execute(ref Fighter fighter, in LocalTransform localTransform, in DynamicBuffer<AvoidingEntityBufferElement> avoidanceBuffer, in Entity entity)
+        public void Execute(ref FighterComponent fighterComponent, in LocalTransform localTransform, in DynamicBuffer<AvoidingEntityBufferElement> avoidanceBuffer, in Entity entity)
         {
             float3 averageAvoidDir = float3.zero;
             
@@ -83,7 +83,7 @@ public partial struct FighterAvoidanceSystem : ISystem
                 averageAvoidDir += direction * distanceFactor;
             }
 
-            fighter.AvoidanceDirection -= averageAvoidDir;
+            fighterComponent.AvoidanceDirection -= averageAvoidDir;
         }
     }
 }

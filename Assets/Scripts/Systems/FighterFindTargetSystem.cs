@@ -12,7 +12,7 @@ public partial struct FighterFindTargetSystem : ISystem
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<Config>();
-        state.RequireForUpdate<Fighter>();
+        state.RequireForUpdate<FighterComponent>();
         state.RequireForUpdate<TargetEntity>();
         state.RequireForUpdate<FighterSettings>();
     }
@@ -73,7 +73,7 @@ public partial struct FighterFindTargetSystem : ISystem
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
         [ReadOnly] public NativeArray<Entity> Targets;
 
-        public void Execute(RefRW<Fighter> fighterRef, RefRO<LocalTransform> localTransformRO)
+        public void Execute(RefRW<FighterComponent> fighterRef, RefRO<LocalTransform> localTransformRO)
         {
             var fighter = fighterRef.ValueRW;
             float3 myPos = localTransformRO.ValueRO.Position;

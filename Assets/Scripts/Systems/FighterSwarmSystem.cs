@@ -55,7 +55,7 @@ public partial struct FighterSwarmSystem : ISystem
     {
         [ReadOnly] public FighterSettings Settings;
         [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
-        void Execute(in DynamicBuffer<NearbyFighter> buffer, in LocalTransform localTransform, ref Fighter fighter, in Entity entity)
+        void Execute(in DynamicBuffer<NearbyFighter> buffer, in LocalTransform localTransform, ref FighterComponent fighterComponent, in Entity entity)
         {
             float size = buffer.Length;
             
@@ -75,24 +75,19 @@ public partial struct FighterSwarmSystem : ISystem
                 if (!LocalTransformLookup.HasComponent(element.entity))  
                     continue;
 
-                var neigbourLocalTransform = LocalTransformLookup[element.entity];
-                averagePosition += neigbourLocalTransform.Position;
-                averageDir += neigbourLocalTransform.Forward();
+                var neighbourLocalTransform = LocalTransformLookup[element.entity];
+                averagePosition += neighbourLocalTransform.Position;
+                averageDir += neighbourLocalTransform.Forward();
                 
-                var direction = entityLocalTransform.Position - neigbourLocalTransform.Position;
-                var distance = math.lengthsq(direction);
-                
-                float radiusSq = Settings.NeighbourDetectionRadius * Settings.NeighbourDetectionRadius;
-                float distanceFactor = math.lerp(0, 1, math.clamp(math.unlerp(radiusSq, 0f, distance), 0, 1));
-                
-                if (distance > 0f)
-                    averageCounterForceDir += math.normalize(direction) * distanceFactor;
+                var direction = entityLocalTransform.Position - neighbourLocalTransform.Position;
+
+                averageCounterForceDir += direction;
             }
 
-            fighter.CrowdCenter = averagePosition / math.max(size, 1f);
+            fighterComponent.CrowdCenter = averagePosition / math.max(size, 1f);
 
-            fighter.AlignmentDirection = averageDir;
-            fighter.NeighbourCounterForceDirection = averageCounterForceDir;
+            fighterComponent.AlignmentDirection = averageDir;
+            fighterComponent.NeighbourCounterForceDirection = averageCounterForceDir;
         }
     }
 }

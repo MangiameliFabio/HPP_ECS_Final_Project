@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Transforms;
 using Unity.Mathematics;
 
-[UpdateAfter(typeof(FighterRayCastSystem))]
+[UpdateAfter(typeof(FighterShootingSystem))]
 public partial struct FighterShootingVFXSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
@@ -49,10 +49,10 @@ public partial struct FighterShootingVFXSystem : ISystem
         public EntityCommandBuffer.ParallelWriter ECB;
 
         void Execute([ChunkIndexInQuery] int sortKey,
-                     in Fighter fighter,
+                     in FighterComponent fighterComponent,
                      in LocalToWorld transform)
         {
-            if (!fighter.IsShooting)
+            if (!fighterComponent.IsShooting)
                 return;
 
             Entity beamVFX = ECB.Instantiate(sortKey, BeamVFXPrefab);

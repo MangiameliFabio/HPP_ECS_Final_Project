@@ -10,6 +10,7 @@ public partial struct LaserCollisionSystem : ISystem
 {
     public void OnCreate(ref SystemState state)
     {
+        state.RequireForUpdate<StarDestroyerSettings>();
         state.RequireForUpdate<Config>();
         state.RequireForUpdate<PhysicsWorldSingleton>();
     }
@@ -19,10 +20,12 @@ public partial struct LaserCollisionSystem : ISystem
     {
         var physicsSingleton = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
         ref var physicsWorld = ref physicsSingleton.PhysicsWorld;
+        var destroyerSettings = SystemAPI.GetSingleton<StarDestroyerSettings>();
 
         var job = new LaserCollisionJob()
         {
-            CurrentPhysicsWorld = physicsWorld
+            CurrentPhysicsWorld = physicsWorld,
+            Settings = destroyerSettings
         };
         
         var config = SystemAPI.GetSingleton<Config>();
@@ -46,6 +49,7 @@ public partial struct LaserCollisionSystem : ISystem
     partial struct LaserCollisionJob : IJobEntity
     {
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
+        [ReadOnly] public StarDestroyerSettings Settings;
 
         void Execute(ref LocalTransform localTransform,
                             in LaserSD laser,
@@ -55,7 +59,7 @@ public partial struct LaserCollisionSystem : ISystem
             hitBuffer.Clear();
 
             float3 center = localTransform.Position;
-            float radiusVal = 20f;
+            float radiusVal = Settings.ProjectileRadius;
 
             var pInput = new PointDistanceInput
             {

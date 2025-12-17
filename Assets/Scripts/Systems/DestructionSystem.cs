@@ -46,7 +46,7 @@ public partial struct DestructionSystem : ISystem
                     for (int i = 0; i < entities.Length; i++)
                     {
                         var linkedEntity = entities[i];
-                        if (state.EntityManager.HasComponent<Fighter>(linkedEntity))
+                        if (state.EntityManager.HasComponent<FighterComponent>(linkedEntity))
                         {
                             KillCount.FightersKilled += 1;
                         }
@@ -59,7 +59,7 @@ public partial struct DestructionSystem : ISystem
                 }
                 else
                 {
-                    if (state.EntityManager.HasComponent<Fighter>(entity))
+                    if (state.EntityManager.HasComponent<FighterComponent>(entity))
                     {
                         KillCount.FightersKilled += 1;
                     }

@@ -8,6 +8,9 @@ using Unity.Jobs;
 using UnityEngine;
 using System.Globalization;
 using UnityEngine.VFX;
+
+
+[UpdateAfter(typeof(CompanionGameObjectUpdateTransformSystem))]
 public partial struct CanonFireSystem : ISystem
 {
     [BurstCompile]
@@ -21,7 +24,7 @@ public partial struct CanonFireSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var fighterQuery = SystemAPI.QueryBuilder().WithAll<Fighter, LocalTransform, LocalToWorld>().Build();
+        var fighterQuery = SystemAPI.QueryBuilder().WithAll<FighterComponent, LocalTransform, LocalToWorld>().Build();
         int currentFighterCount = fighterQuery.CalculateEntityCount();
         var config = SystemAPI.GetSingleton<Config>();
         var parentLocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true);
@@ -89,7 +92,7 @@ public partial struct OrientateCanonsJob : IJobEntity
     public Entity LaserPrefab;
     public Entity BlastVFXPrefab;
 
-    void Execute([ChunkIndexInQuery] int sortKey, ref LocalTransform transform, ref Canon canon, in LocalToWorld localToWorld, in Parent parent)
+    void Execute([ChunkIndexInQuery] int sortKey, ref LocalTransform transform, ref Canon canon, [ReadOnly] in LocalToWorld localToWorld, in Parent parent)
     {
         if (FighterCount == 0)
         {

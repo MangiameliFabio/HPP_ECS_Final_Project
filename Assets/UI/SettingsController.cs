@@ -59,7 +59,8 @@ public class SettingsController : MonoBehaviour
             "TargetMinDistance",
             "FireCooldown",
             "SDSpeed",
-            "SDMovementRadius"
+            "SDMovementRadius",
+            "SDProjectileRadius"
         };
         
         foreach (var name in sliderNames)
@@ -222,6 +223,7 @@ public class SettingsController : MonoBehaviour
         if (_sliders.ContainsKey("FireCooldown")) _sliders["FireCooldown"].value = (float)fighterSettings.FireCooldown;
         if (_sliders.ContainsKey("SDSpeed")) _sliders["SDSpeed"].value = destroyerSettings.Speed * 100f;
         if (_sliders.ContainsKey("SDMovementRadius")) _sliders["SDMovementRadius"].value = destroyerSettings.MovementRadius;
+        if (_sliders.ContainsKey("SDProjectileRadius")) _sliders["SDProjectileRadius"].value = destroyerSettings.ProjectileRadius;
     }
     
     private void OnSliderChanged(string name, ChangeEvent<float> evt)
@@ -247,6 +249,7 @@ public class SettingsController : MonoBehaviour
             case "FireCooldown": fighterSettings.FireCooldown = evt.newValue; break;
             case "SDSpeed": starDestroyerSettings.Speed = evt.newValue / 100f; break;
             case "SDMovementRadius": starDestroyerSettings.MovementRadius = evt.newValue; break;
+            case "SDProjectileRadius": starDestroyerSettings.ProjectileRadius = evt.newValue; break;
         }
 
         _em.SetComponentData(_fighterSettingsEntity, fighterSettings);

@@ -52,13 +52,13 @@ public partial struct FighterRecyclingSystem : ISystem
 public partial struct RecyclingJob : IJobEntity
 {
     public Config Config;
-    void Execute(ref LocalTransform transform, ref Fighter fighter, ref HealthComponent healthComponent)
+    void Execute(ref LocalTransform transform, ref FighterComponent fighterComponent, ref HealthComponent healthComponent)
     {
         if (healthComponent.Health > 0)
             return;
 
         // reset position of the fighter
-        transform.Position = fighter.StartPosition;
+        transform.Position = fighterComponent.StartPosition;
 
         healthComponent.Health = 1;
     }

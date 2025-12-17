@@ -31,7 +31,7 @@ public partial struct SimpleExplosionSystem : ISystem
         {
             ECB = ecb,
             config = SystemAPI.GetSingleton<Config>(),
-            FighterLookup = SystemAPI.GetComponentLookup<Fighter>(true)
+            FighterLookup = SystemAPI.GetComponentLookup<FighterComponent>(true)
         };
 
         state.Dependency = job.ScheduleParallel(state.Dependency);
@@ -53,7 +53,7 @@ public partial struct SpawnExplosionJob : IJobEntity
     public EntityCommandBuffer.ParallelWriter ECB;
     public Config config;
 
-    [ReadOnly] public ComponentLookup<Fighter> FighterLookup;
+    [ReadOnly] public ComponentLookup<FighterComponent> FighterLookup;
 
     void Execute(
         [ChunkIndexInQuery] int sortKey,

@@ -17,7 +17,7 @@ public partial struct ShipSpawnSystem : ISystem
         state.RequireForUpdate<Config>();
 
         _starDestroyerQuery = state.GetEntityQuery(ComponentType.ReadOnly<StarDestroyer>());
-        _fighterQuery = state.GetEntityQuery(ComponentType.ReadOnly<Fighter>());
+        _fighterQuery = state.GetEntityQuery(ComponentType.ReadOnly<FighterComponent>());
     
         _isInitialSpawn = true;
     }
@@ -111,7 +111,7 @@ public partial struct ShipSpawnSystem : ISystem
             var randomTransform =
                 TransformUtils.CreateRandomTransform(config.MinSpawningBounds, config.MaxSpawningBounds, UnityEngine.Random.rotation);
             
-            var fighter = state.EntityManager.GetComponentData<Fighter>(fighterEntity);
+            var fighter = state.EntityManager.GetComponentData<FighterComponent>(fighterEntity);
             fighter.StartPosition = randomTransform.Position;
 
             state.EntityManager.SetComponentData(fighterEntity, fighter);

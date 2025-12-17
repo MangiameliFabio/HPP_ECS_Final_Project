@@ -53,7 +53,7 @@ public partial struct NearbySearchSystem : ISystem
         [ReadOnly] public PhysicsWorld CurrentPhysicsWorld;
 
         void Execute(in LocalTransform localTransform,
-                    in Fighter fighter,
+                    in FighterComponent fighterComponent,
                     ref DynamicBuffer<NearbyFighter> swarmBuffer,
                     ref DynamicBuffer<AvoidingEntityBufferElement> avoidanceBuffer,
                     in Entity entity)

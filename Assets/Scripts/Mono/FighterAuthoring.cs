@@ -26,7 +26,7 @@ public class FighterAuthoring : MonoBehaviour
         {
             // GetEntity returns the Entity baked from the GameObject
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
-            AddComponent(entity, new Fighter
+            AddComponent(entity, new FighterComponent
             {
                 CurrentTargetPosition = float3.zero,
             });
@@ -52,7 +52,7 @@ public enum FighterState : byte
     Retreat = 1
 }
 
-public struct Fighter : IComponentData
+public struct FighterComponent : IComponentData
 {
     public float3 AlignmentDirection;
     public float3 CrowdCenter;
