@@ -30,6 +30,7 @@
                 <ui:Label text="Press WASD to nove camera" name="WASD" style="color: rgb(255, 255, 255); display: flex;" />
                 <ui:Label text="Press LMB to speed up camera" name="LMB" style="color: rgb(255, 255, 255); display: flex;" />
                 <ui:Label text="Press F11 to toggle settings" name="PressF11" style="color: rgb(255, 255, 255); display: flex;" />
+                <ui:Label text="Press F12 to toggle stats" name="PressF12" style="color: rgb(255, 255, 255); display: flex;" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="Stats" style="flex-grow: 0; right: auto; display: flex; position: relative; width: auto; background-color: rgba(0, 0, 0, 0.31); opacity: 1; align-content: flex-end; flex-direction: column; height: auto; align-items: flex-start; flex-shrink: 0; flex-wrap: nowrap; top: auto; left: auto; margin-top: 0; margin-right: 0; margin-bottom: auto; margin-left: 0;">
@@ -41,7 +42,10 @@
                 <ui:Label text="Killed Star Destroyer:" name="SDKillCount" style="color: rgb(255, 255, 255); display: flex; min-width: 150px;" />
                 <ui:Label text="0" name="AmountStarDestroyer" style="color: rgb(255, 255, 255); display: flex; min-width: 50px;" />
             </ui:VisualElement>
-            <ui:Label name="Performance" />
+            <ui:VisualElement name="PerformanceStats" style="flex-grow: 1; display: none;">
+                <ui:Label name="Performance" />
+                <ui:Button text="Reset Stats" name="ResetStatsButton" style="padding-left: 2px; padding-top: 0; padding-right: 2px; padding-bottom: 0;" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

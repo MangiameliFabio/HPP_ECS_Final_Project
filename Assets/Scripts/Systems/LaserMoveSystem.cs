@@ -25,6 +25,7 @@ public partial struct LaserMoveSystem : ISystem
         switch (config.RunType)
         {
             case RunningType.MainThread:
+                state.Dependency.Complete();
                 job.Run();
                 break;
             case RunningType.Scheduled:
