@@ -250,8 +250,6 @@ public class SettingsController : MonoBehaviour
         _maxFps = 0;
         _minFrameTime = float.MaxValue;
         _maxFrameTime = 0;
-        
-        frameTimes.Clear();
     }
     
     private void OnRunParallelChanged(ChangeEvent<string> evt)
@@ -263,8 +261,6 @@ public class SettingsController : MonoBehaviour
         _maxFps = 0;
         _minFrameTime = float.MaxValue;
         _maxFrameTime = 0;
-        
-        frameTimes.Clear();
 
         var runType = evt.newValue;
         var cfg = _em.GetComponentData<Config>(_configEntity);
