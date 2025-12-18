@@ -16,7 +16,7 @@ public class StarDestroyerAuthoring : MonoBehaviour
         public override void Bake(StarDestroyerAuthoring authoring)
         {
             var entity = GetEntity(authoring, TransformUsageFlags.Dynamic);
-            AddComponent(entity, new StarDestroyer
+            AddComponent(entity, new StarDestroyerComponent
             {
                 MovementProcess = authoring.movementProgress,
                 Point1 = authoring.point1,
@@ -33,7 +33,7 @@ public class StarDestroyerAuthoring : MonoBehaviour
         }
     }
 }
-public struct StarDestroyer : IComponentData
+public struct StarDestroyerComponent : IComponentData
 {
     public float MovementProcess;
     public float3 Point1; // array would be better, but ECS has limited support for arrays

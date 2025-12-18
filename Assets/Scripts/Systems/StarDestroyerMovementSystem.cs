@@ -59,7 +59,7 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
     public float globalTime;
 
     [BurstCompile]
-    void Execute(ref LocalTransform transform, ref StarDestroyer starDestroyer)
+    void Execute(ref LocalTransform transform, ref StarDestroyerComponent starDestroyer)
     {
         if (starDestroyer.HasJumpedInScene)
         {
@@ -90,7 +90,7 @@ public partial struct MoveTowardsTargetPoint : IJobEntity
         }
     }
 
-    void PatrolPoints(ref LocalTransform transform, ref StarDestroyer starDestroyer, ref StarDestroyerSettings settings)
+    void PatrolPoints(ref LocalTransform transform, ref StarDestroyerComponent starDestroyer, ref StarDestroyerSettings settings)
     {
         float process = starDestroyer.MovementProcess + settings.Speed * deltaTime;
         starDestroyer.MovementProcess = process;

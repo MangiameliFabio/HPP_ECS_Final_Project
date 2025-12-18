@@ -39,7 +39,7 @@ public partial struct DestructionSystem : ISystem
             if (health.ValueRO.Health <= 0)
             {
                 // only look at linked entities if it is a star destroyer
-                if (state.EntityManager.HasComponent<StarDestroyer>(entity))
+                if (state.EntityManager.HasComponent<StarDestroyerComponent>(entity))
                 {
                     var linked = state.EntityManager.GetBuffer<LinkedEntityGroup>(entity);
                     var entities = linked.Reinterpret<Entity>().AsNativeArray();

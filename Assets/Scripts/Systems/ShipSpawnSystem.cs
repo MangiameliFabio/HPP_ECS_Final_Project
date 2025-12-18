@@ -16,7 +16,7 @@ public partial struct ShipSpawnSystem : ISystem
         state.RequireForUpdate<StarDestroyerSettings>();
         state.RequireForUpdate<Config>();
 
-        _starDestroyerQuery = state.GetEntityQuery(ComponentType.ReadOnly<StarDestroyer>());
+        _starDestroyerQuery = state.GetEntityQuery(ComponentType.ReadOnly<StarDestroyerComponent>());
         _fighterQuery = state.GetEntityQuery(ComponentType.ReadOnly<FighterComponent>());
     
         _isInitialSpawn = true;
@@ -60,9 +60,9 @@ public partial struct ShipSpawnSystem : ISystem
                 state.EntityManager.SetComponentData(destroyerEntity, randomTransform);
             }
 
-            if (state.EntityManager.HasComponent<StarDestroyer>(destroyerEntity))
+            if (state.EntityManager.HasComponent<StarDestroyerComponent>(destroyerEntity))
             {
-                var starDestroyer = state.EntityManager.GetComponentData<StarDestroyer>(destroyerEntity);
+                var starDestroyer = state.EntityManager.GetComponentData<StarDestroyerComponent>(destroyerEntity);
 
                 starDestroyer.ID = UnityEngine.Random.Range(1, int.MaxValue);
 
