@@ -33,6 +33,9 @@ public class SettingsController : MonoBehaviour
     private Label _fighterKilledLabel;
     private Label _starDestroyerKilledLabel;
     private Label _performanceText;
+    private Button _resetStatsButton;
+    private VisualElement _performanceStats;
+
     public int sampleSize = 300;
 
     private Queue<float> frameTimes = new Queue<float>();
@@ -98,10 +101,20 @@ public class SettingsController : MonoBehaviour
         _dropDownRunningType = _ui.Q<DropdownField>("RunningType");
         _dropDownRunningType.RegisterValueChangedCallback(OnRunParallelChanged);
         
+        _performanceStats = _ui.Q<VisualElement>("PerformanceStats");
+        
+        _resetStatsButton = _ui.Q<Button>("ResetStatsButton");
+        _resetStatsButton.clicked += OnStatReset;
+        
         _performanceText = _ui.Q<Label>("Performance");
         
         StartCoroutine(WaitForECSWorld());
     }
+
+    private float _minFps = float.MaxValue;
+    private float _maxFps = 0;
+    private float _minFrameTime = float.MaxValue;
+    private float _maxFrameTime = 0;
     
     void Update()
     {
@@ -111,6 +124,14 @@ public class SettingsController : MonoBehaviour
             _settingsContainer.visible = !_settingsContainer.visible;
             Cursor.visible = !Cursor.visible;  
             Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ? CursorLockMode.None : CursorLockMode.Locked;
+        }
+        
+        if (_keyboard != null && _keyboard.f12Key.wasPressedThisFrame)
+        {
+            _performanceStats.style.display =
+                _performanceStats.style.display == DisplayStyle.None
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
         }
         
         _fighterKilledLabel.text = KillCount.FightersKilled.ToString();
@@ -131,12 +152,21 @@ public class SettingsController : MonoBehaviour
         float avgDeltaTime = frameTimeSum / frameTimes.Count;
         float avgFrameTimeMs = avgDeltaTime * 1000f;
         float avgFps = 1f / avgDeltaTime;
+        
+        if (avgFrameTimeMs < _minFrameTime) _minFrameTime = avgFrameTimeMs;
+        if (avgFrameTimeMs >  _maxFrameTime) _maxFrameTime = avgFrameTimeMs;
+        if (avgFps <  _minFps) _minFps = avgFps;
+        if (avgFps > _maxFps) _maxFps = avgFps;
 
         _performanceText.text =
             $"FPS: {fps:F1}\n" +
             $"Avg FPS: {avgFps:F1}\n" +
+            $"min FPS: {_minFps:F1}\n" +
+            $"max FPS: {_maxFps:F1}\n" +
             $"Frame Time: {frameTimeMs:F2} ms\n" +
-            $"Avg Frame Time: {avgFrameTimeMs:F2} ms";
+            $"Avg Frame Time: {avgFrameTimeMs:F2} ms\n" +
+            $"min Frame Time: {_minFrameTime:F2} ms\n" +
+            $"max Frame Time: {_maxFrameTime:F2} ms\n";
     }
     
     private IEnumerator WaitForECSWorld()
@@ -163,6 +193,7 @@ public class SettingsController : MonoBehaviour
         var destroyerSettings = _em.GetComponentData<StarDestroyerSettings>(_starDestroyerSettingsEntity);
         var fighterSettings = _em.GetComponentData<FighterSettings>(_fighterSettingsEntity);
         SetSliderValues(fighterSettings, destroyerSettings);
+        _starDestroyerHealth.value = destroyerSettings.Health.ToString();
         
         var cfg = _em.GetComponentData<Config>(_configEntity);
         _fighterSpawnCount.value = cfg.FighterCount.ToString();
@@ -212,11 +243,28 @@ public class SettingsController : MonoBehaviour
         settings.Health = health;
         _em.SetComponentData(_starDestroyerSettingsEntity, settings);
     }
+
+    private void OnStatReset()
+    {
+        _minFps = float.MaxValue;
+        _maxFps = 0;
+        _minFrameTime = float.MaxValue;
+        _maxFrameTime = 0;
+        
+        frameTimes.Clear();
+    }
     
     private void OnRunParallelChanged(ChangeEvent<string> evt)
     {
         if (_configEntity == Entity.Null)
             return;
+        
+        _minFps = float.MaxValue;
+        _maxFps = 0;
+        _minFrameTime = float.MaxValue;
+        _maxFrameTime = 0;
+        
+        frameTimes.Clear();
 
         var runType = evt.newValue;
         var cfg = _em.GetComponentData<Config>(_configEntity);

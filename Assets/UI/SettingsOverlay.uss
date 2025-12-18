@@ -108,3 +108,7 @@ DropdownField PopupTextElement {
     padding-left: 0;
     font-size: 12px;
 }
+
+#ToggleMessage Label {
+    font-size: 10px;
+}
