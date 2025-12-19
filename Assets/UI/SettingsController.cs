@@ -102,6 +102,7 @@ public class SettingsController : MonoBehaviour
         _dropDownRunningType.RegisterValueChangedCallback(OnRunParallelChanged);
         
         _performanceStats = _ui.Q<VisualElement>("PerformanceStats");
+        _performanceStats.style.display = DisplayStyle.None;
         
         _resetStatsButton = _ui.Q<Button>("ResetStatsButton");
         _resetStatsButton.clicked += OnStatReset;

@@ -42,7 +42,7 @@
                 <ui:Label text="Killed Star Destroyer:" name="SDKillCount" style="color: rgb(255, 255, 255); display: flex; min-width: 150px;" />
                 <ui:Label text="0" name="AmountStarDestroyer" style="color: rgb(255, 255, 255); display: flex; min-width: 50px;" />
             </ui:VisualElement>
-            <ui:VisualElement name="PerformanceStats" style="flex-grow: 1; display: none;">
+            <ui:VisualElement name="PerformanceStats" style="flex-grow: 1; display: flex;">
                 <ui:Label name="Performance" />
                 <ui:Button text="Reset Stats" name="ResetStatsButton" style="padding-left: 2px; padding-top: 0; padding-right: 2px; padding-bottom: 0;" />
             </ui:VisualElement>
